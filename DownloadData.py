@@ -8,6 +8,7 @@ import urllib2
 import gzip
 import json
 import requests
+from datetime import date, timedelta
 
 regn = "http://regnskaber.virk.dk/10275523/ZG9rdW1lbnRsYWdlcjovLzAzLzIxLzQ3L2NkLzFkLzFlYmItNDZlMi1iNDRiLTNlMGUxZDA3ZjJkNQ.xml"
 index = "http://distribution.virk.dk/offentliggoerelser/_search"
@@ -59,13 +60,13 @@ def parseToXmlData(jData):
             if d["dokumentMimeType"] == "application/xml":
                 x =urllib2.urlopen(d["dokumentUrl"])
                 
-                text_file = open(dataFolderZip+"/output"+str(dokData[i]["_source"]["cvrNummer"])+"-"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+".gz", "w+")
+                text_file = open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "w+")
                 text_file.write(x.read())
                 text_file.close()
                 
-                with gzip.open(dataFolderZip+"/output"+str(dokData[i]["_source"]["cvrNummer"])+"-"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+".gz", "rb") as f:
+                with gzip.open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "rb") as f:
                     file_content = f.read()    
-                text_file = open(dataFolderXml+"/cvr"+str(dokData[i]["_source"]["cvrNummer"])+"-"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+".xml", "w+")
+                text_file = open(dataFolderXml+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+"cvr"+str(dokData[i]["_source"]["cvrNummer"])+".xml", "w+")
                 text_file.write(file_content)
                 text_file.close()
                 xmlDok.append(d["dokumentUrl"])
@@ -74,9 +75,19 @@ def parseToXmlData(jData):
     print "number of xml-Documents collected is: ", len(xmlDok)
     
 if __name__ == '__main__':
-    jData = getQueryData("2014-02-01","2014-02-27",1000)
-    response = requests.get(index, data=json.dumps(jData),
-                                 headers=HEADERS_FOR_JSON)
-    response_data = response.json()
-    parseToXmlData(response_data)    
+    
+    
+    start_date = date(2014,1,1)
+    end_date = date(2014,1,2)
+    d = start_date
+    delta = timedelta(days=1)
+    while d < end_date:
+        sd = d.strftime("%Y-%m-%d")
+        d += delta
+        ed = d.strftime("%Y-%m-%d")
+        jData = getQueryData(sd,ed,1000)
+        response = requests.get(index, data=json.dumps(jData),
+                                     headers=HEADERS_FOR_JSON)
+        response_data = response.json()
+        parseToXmlData(response_data)    
 
