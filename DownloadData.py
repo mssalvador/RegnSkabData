@@ -64,11 +64,11 @@ def parseToXmlData(jData):
                 text_file.write(x.read())
                 text_file.close()
                 
-                with gzip.open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "rb") as f:
-                    file_content = f.read()    
-                text_file = open(dataFolderXml+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+"cvr"+str(dokData[i]["_source"]["cvrNummer"])+".xml", "w+")
-                text_file.write(file_content)
-                text_file.close()
+                #with gzip.open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "rb") as f:
+                #    file_content = f.read()    
+                #text_file = open(dataFolderXml+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+"cvr"+str(dokData[i]["_source"]["cvrNummer"])+".xml", "w+")
+                #text_file.write(file_content)
+                #text_file.close()
                 xmlDok.append(d["dokumentUrl"])
     for i in xmlDok:
         print i
@@ -77,8 +77,8 @@ def parseToXmlData(jData):
 if __name__ == '__main__':
     
     
-    start_date = date(2014,1,1)
-    end_date = date(2014,1,2)
+    start_date = date(2015,3,31)
+    end_date = date(2015,7,31)
     d = start_date
     delta = timedelta(days=1)
     while d < end_date:
@@ -89,5 +89,6 @@ if __name__ == '__main__':
         response = requests.get(index, data=json.dumps(jData),
                                      headers=HEADERS_FOR_JSON)
         response_data = response.json()
-        parseToXmlData(response_data)    
+        parseToXmlData(response_data)
+        print sd    
 
