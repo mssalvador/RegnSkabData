@@ -77,8 +77,8 @@ def parseToXmlData(jData):
 if __name__ == '__main__':
     
     
-    start_date = date(2015,3,31)
-    end_date = date(2015,7,31)
+    start_date = date(2015,5,31)
+    end_date = date(2015,12,31)
     d = start_date
     delta = timedelta(days=1)
     while d < end_date:

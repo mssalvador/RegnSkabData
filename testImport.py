@@ -40,12 +40,6 @@ newDataSparseDf.show(truncate = False)
 newDataDf.select(multUdf(newDataDf["vector1"],newDataDf["vector2"]).alias("v1*v2"),absUdf(newDataDf["vector1"])).show()
 testing = newDataSparseDf.select(sparseQuickAddU(newDataSparseDf["vector1"],newDataSparseDf["vector2"]).alias("spv1*spv2")).show(truncate=False)
 
-st1 = """<lnk:schemaRef xlink:href="http://archprod.service.eogs.dk/taxonomy/20130401/entryDanishGAAPBalanceSheetAccountFormIncomeStatementByNatureIncludingManagementsReviewStatisticsAndTax20130401.xsd" """"
-
-                  xlink:type="simple"/>
-
-   <xbrli:context id="duration_only">
-
 
 if __name__ == '__main__':
     pass
