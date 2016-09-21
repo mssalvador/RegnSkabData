@@ -77,15 +77,15 @@ def parseToXmlData(jData):
 if __name__ == '__main__':
     
     
-    start_date = date(2015,5,31)
-    end_date = date(2015,12,31)
+    start_date = date(2016,5,2)
+    end_date = date(2016,9,1)
     d = start_date
     delta = timedelta(days=1)
     while d < end_date:
         sd = d.strftime("%Y-%m-%d")
         d += delta
         ed = d.strftime("%Y-%m-%d")
-        jData = getQueryData(sd,ed,1000)
+        jData = getQueryData(sd,ed,1500)
         response = requests.get(index, data=json.dumps(jData),
                                      headers=HEADERS_FOR_JSON)
         response_data = response.json()
