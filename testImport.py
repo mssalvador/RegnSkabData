@@ -10,6 +10,7 @@ from pyspark import SparkContext
 from pyspark.ml.linalg import Vectors,VectorUDT
 import pyspark.sql.functions as F
 from pyspark.sql import Row
+import sys
 
 sc = SparkContext("local[8]","testing")
 sqlContext = SQLContext(sc)
@@ -40,6 +41,7 @@ newDataSparseDf.show(truncate = False)
 newDataDf.select(multUdf(newDataDf["vector1"],newDataDf["vector2"]).alias("v1*v2"),absUdf(newDataDf["vector1"])).show()
 testing = newDataSparseDf.select(sparseQuickAddU(newDataSparseDf["vector1"],newDataSparseDf["vector2"]).alias("spv1*spv2")).show(truncate=False)
 
+print(sys.path)
 
 if __name__ == '__main__':
     pass

@@ -3,22 +3,23 @@ Created on Sep 14, 2016
 
 @author: svanhmic
 '''
-import re
-import os 
-import fileinput
-import gzip
-import logging
-import multiprocessing
-import sys
 
-def f(x):
-    print os.getpid()
-    return x
+from RegnskabsClass import Regnskaber
+import os
 
+path = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/csv"
 
-if __name__ == '__main__':
-    pool = multiprocessing.Pool(processes=8)
+files = os.listdir(path)
+#regnskab = Regnskaber(files[0])
+lsit = []
+for f in files:
+    lsit.append(Regnskaber(path+"/"+f))
     
-    numb = range(100)
+print("Done with all file")
+print(lsit[0].field)
+
+with open(path+"/taxlist.csv","r") as csvFile:
+    doc = csvFile.read()
+if __name__ == "__main__":
+    pass
     
-    print pool.map(f,numb)

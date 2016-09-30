@@ -71,8 +71,8 @@ def parseToXmlData(jData):
                 #text_file.close()
                 xmlDok.append(d["dokumentUrl"])
     for i in xmlDok:
-        print i
-    print "number of xml-Documents collected is: ", len(xmlDok)
+        print(i)
+    print("number of xml-Documents collected is: ", len(xmlDok))
     
 if __name__ == '__main__':
     
@@ -90,5 +90,5 @@ if __name__ == '__main__':
                                      headers=HEADERS_FOR_JSON)
         response_data = response.json()
         parseToXmlData(response_data)
-        print sd    
+        print(sd)    
 
