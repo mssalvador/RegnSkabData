@@ -24,77 +24,46 @@ sc = SparkContext("local[8]","TestPyspark" )#pyFiles=['/home/svanhmic/workspace/
 sqlContext = SQLContext(sc)
 #sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py')
 
-def doSomething(df):
-    
-    for c in df.columns:
-        df.withColumnRenamed("new","old")    
-    return None
-
-def wordOccurence(colFeature):
-    col = colFeature.toArray()
-        
-    return col
-
 path = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/csv"
 finalXML = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/finalXML"
 cleanedCsvPath = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/csv"
 
-toDenseVectorUDF = F.udf(lambda x: x.toArray(), VectorUDT())
-getIndicesUdf = F.udf(lambda x: Vectors.dense(x.indices),VectorUDT())
+dfRegnskabsCount = sqlContext.read.csv(path=cleanedCsvPath+"/pivotRowDataCounts.csv", sep=";", header=True, encoding="utf-8",inferSchema=True)
+#dfRegnskabsCount.show()
 
-df = sqlContext.read.csv(cleanedCsvPath+"/regnskabsdata.csv", sep=";", header=True,encoding="utf-8") 
-#df.show()
-
-removeBlanksDf = (df
-                  .filter(df["id"] != np.NaN)
-                  .select(df["name"],df["id"],F.regexp_replace(df["value"], r'(\s+) ',"").alias("value"),df["startDate"],df["endDate"]))
-#removeBlanksDf.show(truncate=False)
-removeBlanksDf.select(removeBlanksDf["name"]).distinct().show(truncate=False)
-print(removeBlanksDf.select(removeBlanksDf["name"]).distinct().count())
-pivotCount = removeBlanksDf.groupby("id").pivot("name").count().fillna(0)
-
-specialPivotDf = removeBlanksDf.dropDuplicates().groupby("id","name","value","startDate","endDate").count().groupby("id").pivot("name").agg(F.max(F.struct("count","value")))
-#specialPivotDf.show(1)
-#specialPivotDf.printSchema()
-specialPivotColumns = specialPivotDf.columns
-pivotStructVals = StructType()
-pivotStructCount = StructType()
-for c in specialPivotColumns:
-    pivotStructVals.add(c,StringType(), True)
-    pivotStructCount.add(c, IntegerType(), True)
-
-#print(specialPivotColumns)
-#pivotValues = (specialPivotDf
-#               .rdd
-#               .map(lambda x: [None if x[specialPivotColumns[i]] is None else x[specialPivotColumns[i]] if x[specialPivotColumns[i]][1] is None else x[specialPivotColumns[i]][1] for i in range(len(specialPivotColumns))]))
-#transformedDf = sqlContext.createDataFrame(pivotValues,pivotStructVals)
-
-#print(transformedDf.printSchema())
-#transformedDf.show()
-
-pivotCountRdd = (specialPivotDf
-                .rdd
-                .map(lambda x: [0 if x[specialPivotColumns[i]] is None else 1 for i in range(len(specialPivotColumns))]))
-pivotCountDf = sqlContext.createDataFrame(pivotCountRdd,pivotStructCount)
-#pivotCountDf.show()
-
-groupedPivotCount = (pivotCountDf
+groupedPivotCount = (dfRegnskabsCount
                        .groupBy()
                        .avg()
                        .collect())
-
+print(groupedPivotCount)
 countDict = groupedPivotCount[0].asDict()
+countDict08 = {}
+countDict06 = {}
+countDict04 = {}
+countDict02 = {}
+countDict00 = {}
+
 for (k,v) in countDict.items():
+    if v >= 0.8:
+        countDict08[k] = v
+    elif v >= 0.6 and v < 0.8:
+        countDict06[k] = v
+    elif v >= 0.4 and v < 0.6:
+        countDict04[k] = v
+    elif v >= 0.2 and v < 0.4:
+        countDict02[k] = v
+    else:
+        countDict00[k] = v
     print("keys: " + str(k)+" Values: "+str(v))
 
 fig = plt.figure(1)
 ax = fig.add_subplot(111)
-ind = np.arange(len(specialPivotColumns))
+ind = np.arange(len(countDict08))
 widt = 0.35
-plot1 = ax.bar(ind,countDict.values(),widt,color="green")
+plot1 = ax.bar(ind,countDict08.values(),widt,color="green")
 ax.set_ylim(0,1.1)
-ax.set_xticks(ind+widt)
-xtickNames = ax.set_xticklabels(countDict.keys())
+ax.set_xticks(ind)
+xtickNames = ax.set_xticklabels(countDict08.keys())
 plt.setp(xtickNames, rotation=45, fontsize=10)
 plt.show()
     
