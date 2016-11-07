@@ -10,15 +10,15 @@ import gzip
 import logging
 import multiprocessing
 import sys
+import GetContexts
 from ExportXbrlToCsv import extractXbrlToCsv
 sys.path.insert(0, '/home/svanhmic/Programs/Arelle') # inserts Arelle to the pythonpath, apperently
-
 
 PATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/xml"
 NEWPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/finalXML"
 TAXPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/tax"
 ZIPFLES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/zipped"
-CSVFILES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/csv"
+CSVFILES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testcsv"
 TAXDICT = {}
 TAXDICT["20120101"] = "/dcca20120101"
 TAXDICT["20121001"] = "/XBRL20121001"
@@ -32,7 +32,8 @@ TAXDICT["20141220"] = "/XBRL20141220_IFRS"
 
 def acessFiles(path,taxpath,taxdict,newFolder,removeOld = True):
     '''
-    
+    Opens the xbrl file and adds the taxonomy. The file path and taxonomy is saved into taxlist.csv.
+    altered xbrl files with taxonomy is saved in newfolder
     '''
     files = os.listdir(path)
     taxonomyList = []
@@ -62,7 +63,6 @@ def acessFiles(path,taxpath,taxdict,newFolder,removeOld = True):
                         notMatched = re.search(r'(\d+/\w+)\.\w+', theString.group())
                     
                     if matched and str(matched.group()).replace(" ","") in taxdict.keys() and notMatched:
-                        
                         #print taxpath+taxdict[matched.group()]+"/"+notMatched.group()
                         #print line
                         cleaned = re.sub(r"xlink:href=.*.xsd.","xlink:href=\""+taxpath+taxdict[matched.group()]+"/"+notMatched.group()+"\"",line.rstrip())
@@ -101,20 +101,33 @@ def toCSVFromXML(path,csvDir):
     print(os.getcwd())
     os.chdir("/home/svanhmic/Programs/Arelle")
     for f in files:
-        cmdstr = "python3 arelleCmdLine.py -f"+ path+"/"+f+" --facts "+csvDir+"/"+f+".csv --factListCols Name,Dec,Prec,Lang,EntityIdentifier,Period,Value,Dimensions"
+        cmdstr = "python3 arelleCmdLine.py -f"+ path+"/"+f+" --facts "+csvDir+"/"+f+".csv --factListCols Name,Dec,Prec,Lang,unitRef,contextRef,EntityIdentifier,Period,Value,Dimensions"
         os.system(cmdstr)
     print(os.getcwd())
     print("csv-transformation done!")
     
 def parallelToCsvFromXmlApiStyle(inoutFile):
-    infile = inoutFile[0]
-    outfile = inoutFile[1]
+    infile = inoutFile[0] # the xmlfile
+    outfile = inoutFile[1] # the csv file output
     if os.path.isfile(outfile) is False:
         extractXbrlToCsv(infile, outfile).run()
+        #postProcessing(infile,outfile) # Can't figure this out, very annoying 
         print(str(os.getpid())+", File: "+infile+", is Done!")
     else:
         print(outfile+": is already created!")
-  
+        
+def postProcessing(docPath,csvPath,checkFile=None):
+    """ 
+    Wrapper for replaceUnitsAndContexts such that a naive "version" control can be made and parallel processing can be initiated.
+    
+    Input
+        docPath: The path to the directory where the xml-files are stored. 
+        csvPath: The path to the directory where the csvfiles are stored.
+        checkFile: A file that monitors if a file has been updated with context and unitRefs
+    
+    Output
+    """
+    GetContexts.replaceUnitsAndContexts(docPath,csvPath)  
     
 if __name__ == '__main__':
     #unZipCollection(ZIPFLES, PATH)
@@ -122,8 +135,13 @@ if __name__ == '__main__':
     files = os.listdir(NEWPATH)
     files = tuple([[NEWPATH+"/"+f,CSVFILES+"/"+f+".csv"] for f in files])
     #print(files[:3])
-    #parallelToCsvFromXmlApiStyle(files[0])
+    #parallelToCsvFromXmlApiStyle(files)
     pool = multiprocessing.Pool(processes=8)
-    pool.map(parallelToCsvFromXmlApiStyle,files)
+    pool.map(parallelToCsvFromXmlApiStyle,files[:20000])
+    csvFiles = os.listdir(CSVFILES)
+    allFiles = tuple([[NEWPATH+"/"+re.sub(r"\.csv","",f),CSVFILES+"/"+f] for f in csvFiles])
+    #print(allFiles[:10])
+    #for file in allFiles:
+    #    postProcessing(file[0],file[1])
     
     

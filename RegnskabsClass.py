@@ -28,21 +28,23 @@ class Regnskaber(object):
             doc = csv.reader(f,delimiter=",")
             for fields in doc:
                 try:
-                    self.field.append(Fields(fields[0],fields[1],fields[2],fields[3],fields[4],fields[5],fields[6],fields[7],fields[8]))
+                    self.field.append(Fields(fields[0],fields[1],fields[2],fields[3],fields[4],fields[5],fields[6],fields[7],fields[8],fields[9],fields[10]))
                 except IndexError:
                     #print("The last index is not included")
-                    self.field.append(Fields(fields[0],fields[1],fields[2],fields[3],fields[4],fields[5],fields[6],fields[7]))
+                    self.field.append(Fields(fields[0],fields[1],fields[2],fields[3],fields[4],fields[5],fields[6],fields[7],fields[8],fields[9]))
 
 class Fields(object):
     '''
-    classdocs ['\ufeffName', 'Dec', 'Prec', 'Lang', 'EntityIdentifier', 'Start', 'End/Instant', 'Value', 'Dimensions']
+    classdocs ['\ufeffName', 'Dec', 'Prec', 'Lang',"unitRef","contextRef", 'EntityIdentifier', 'Start', 'End/Instant', 'Value', 'Dimensions']
     '''
      
-    def __init__(self,name,decimals,precision,lang,id,startDate,endDate,value,dim=None):
+    def __init__(self,name,decimals,precision,lang,unit,contextRef,id,startDate,endDate,value,dim=None):
         self.name = name
         self.decimals = decimals
         self.precision = precision
         self.lang = lang
+        self.unit = unit
+        self.contextRef = contextRef
         self.id = id
         self.startDate = startDate
         self.endDate = endDate
