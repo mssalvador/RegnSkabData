@@ -10,13 +10,9 @@ import gzip
 import logging
 import multiprocessing
 import sys
-<<<<<<< HEAD
 import io
 import GetContexts
 import contextlib
-=======
-import GetContexts
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
 from ExportXbrlToCsv import extractXbrlToCsv
 sys.path.insert(0, '/home/svanhmic/Programs/Arelle') # inserts Arelle to the pythonpath, apperently
 
@@ -122,11 +118,8 @@ def parallelToCsvFromXmlApiStyle(inoutFile):
     else:
         print(outfile+": is already created!")
         
-<<<<<<< HEAD
+        
 def postProcessing(docPath,csvPath,logFile="/tmp/log.txt"):
-=======
-def postProcessing(docPath,csvPath,checkFile=None):
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     """ 
     Wrapper for replaceUnitsAndContexts such that a naive "version" control can be made and parallel processing can be initiated.
     
@@ -137,25 +130,18 @@ def postProcessing(docPath,csvPath,checkFile=None):
     
     Output
     """
-<<<<<<< HEAD
-    
     with open(logFile,"a") as log:
         try: 
             log.write(GetContexts.replaceUnitsAndContexts(docPath,csvPath)+"\n")
         except KeyError:
             print(csvPath+"the file is already processed\n")
-    
-=======
-    GetContexts.replaceUnitsAndContexts(docPath,csvPath)  
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
+
     
 if __name__ == '__main__':
     #unZipCollection(ZIPFLES, PATH)
     #acessFiles(PATH,TAXPATH,TAXDICT,NEWPATH,removeOld=False)
     files = os.listdir(NEWPATH)
-    files = tuple([[NEWPATH+"/"+f,CSVFILES+"/"+f+".csv"] for f in files])
-<<<<<<< HEAD
-    
+    files = tuple([[NEWPATH+"/"+f,CSVFILES+"/"+f+".csv"] for f in files]) 
     #The conversion takes place here
     pool = multiprocessing.Pool(processes=8)
     pool.map(parallelToCsvFromXmlApiStyle,files[:20000])
@@ -167,16 +153,5 @@ if __name__ == '__main__':
     #Units and References are added to the csv-files 
     for file in allFiles:
         postProcessing(file[0],file[1])
-=======
-    #print(files[:3])
-    #parallelToCsvFromXmlApiStyle(files)
-    pool = multiprocessing.Pool(processes=8)
-    pool.map(parallelToCsvFromXmlApiStyle,files[:20000])
-    csvFiles = os.listdir(CSVFILES)
-    allFiles = tuple([[NEWPATH+"/"+re.sub(r"\.csv","",f),CSVFILES+"/"+f] for f in csvFiles])
-    #print(allFiles[:10])
-    #for file in allFiles:
-    #    postProcessing(file[0],file[1])
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     
     

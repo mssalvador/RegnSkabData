@@ -3,10 +3,7 @@ Created on Oct 10, 2016
 
 @author: svanhmic
 '''
-<<<<<<< HEAD
-=======
 from pyspark import SparkContext
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
 from pyspark.sql import SQLContext
 import pyspark.sql.functions as F
 import pyspark.sql.types as pyt
@@ -16,7 +13,6 @@ import re
 #from RegnskabsClass import Regnskaber
 
 import sys
-<<<<<<< HEAD
 from pyspark.context import SparkContext
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -40,16 +36,6 @@ def testValue(*x):
         output -
     
     '''
-=======
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
-sc = SparkContext("local[8]","CreateRegnskabsFormat" )#pyFiles=['/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py'])
-sqlContext = SQLContext(sc)
-#sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py')
-
-def testValue(*x):
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     #print(x)
     output = []
     for val in x:
@@ -95,18 +81,13 @@ def getNumberOfTypes(df):
     output = {}
 #    nDf = df.drop_duplicates()
     for c in cols:
-<<<<<<< HEAD
         Ndf = df.select(c).filter(F.col(c) != "<class 'NoneType'>").distinct().select(F.regexp_replace(F.col(c), r'type|\W', "").alias("types")).cache()
-=======
-        Ndf = df.select(c).filter(F.col(c) != "<type 'NoneType'>").distinct().select(F.regexp_replace(F.col(c), r'type|\W', "").alias("types")).cache()
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
         count = Ndf.count()
         types = Ndf.collect()
         output[c] = (count,getValues(*types))
         Ndf.unpersist()
     return output
 
-<<<<<<< HEAD
 def printList(lis):
     assert isinstance(lis, list), "this is not a list it's a:"+str(type(lis))
     for line in lis:
@@ -121,25 +102,10 @@ def main():
     Description: Main method. 
     '''
     #Extract formattet accounts from csv-files
-=======
-
-
-path = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/csv"
-finalXML = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/finalXML"
-cleanedCsvPath = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/csv"
-
-
-
-
-#Note to tomorrow Do something GREAT! 
-# And divide the plots up such that labels can be seen
-if __name__ == '__main__':
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
-    dfRegnskabsVal = sqlContext.read.csv(path=cleanedCsvPath+"/pivotRowDataValues.csv", sep=";" , header=True,encoding="utf-8",dateFormat="yyyy-mm-dd",nullValue="none")
+    dfRegnskabsVal = sqlContext.read.csv(path=path+"/pivotRowDataValues.csv", sep=";" , header=True,encoding="utf-8",dateFormat="yyyy-mm-dd",nullValue="none")
     #dfRegnskabsVal.show()
     #dfRegnskabsVal.printSchema()
     dfCols = dfRegnskabsVal.columns
-<<<<<<< HEAD
     printList(dfCols)
     #rddOfRows = dfRegnskabsVal.select(dfRegnskabsVal[assetsCols[0]]).rdd.map(lambda x: testValue(*x)).cache() # TESTING PURPOSES ONLY!
     rddOfRows = dfRegnskabsVal.rdd.map(lambda x: testValue(*x)).cache()
@@ -175,49 +141,9 @@ if __name__ == '__main__':
 #             else:
 #                 structSchema.add(cols,pyt.StringType(),True)
 #                 #print(str(cols)+" has been sent down here as a string!")
-=======
-    assetsCols =["assets"]
-    
-    #rddOfRows = dfRegnskabsVal.select(dfRegnskabsVal[assetsCols[0]]).rdd.map(lambda x: testValue(*x)).cache() # TESTING PURPOSES ONLY!
-    rddOfRows = dfRegnskabsVal.rdd.map(lambda x: testValue(*x)).cache()
-    #for c in rddOfRows.collect():
-    #    print(c)
-    
-    OfTypesDf = rddOfRows.map(lambda x: getTypes(*x)).toDF(dfCols).cache()
-    #OfTypesDf.show()
-    
-    numberOfTypesPrCol = getNumberOfTypes(OfTypesDf)
-    structSchema = pyt.StructType()
-    for (i,cols) in enumerate(dfCols):
-        
-        if numberOfTypesPrCol[cols][0] > 1:
-            if "unicode" in numberOfTypesPrCol[cols][1]:
-                structSchema.add(cols, pyt.StringType(),True)
-            elif "float" in numberOfTypesPrCol[cols][1]:
-                structSchema.add(cols, pyt.StringType(),True)
-            print(cols)
-            print(numberOfTypesPrCol[cols])
-        else:
-            colType = numberOfTypesPrCol[cols][1][0]
-            #colType = re.sub(r'\W+',"",colType) 
-            #print(colType)
-            if colType == "unicode":
-                structSchema.add(cols,pyt.StringType(),True)
-            elif colType == "float":
-                structSchema.add(cols,pyt.FloatType(),True)
-            elif colType == "int":
-                structSchema.add(cols,pyt.LongType(),True)
-            elif colType == "datetimedatetime":
-                structSchema.add(cols,pyt.DateType(),True)
-            else:
-                structSchema.add(cols,pyt.StringType(),True)
-                #print(str(cols)+" has been sent down here as a string!")
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
         #print("col "+str(i)+" val "+str(v))
     
     #print(structSchema)
-    
-<<<<<<< HEAD
     #dataWithSchema = sqlContext.createDataFrame(rddOfRows,structSchema)
     #dataWithSchema.distinct().show()
     #dataWithSchema.write.csv(cleanedCsvPath+"/formattetreskabsdata.csv",sep=";", header=True,mode="overwrite")
@@ -227,11 +153,6 @@ if __name__ == '__main__':
 # And divide the plots up such that labels can be seen
 if __name__ == '__main__':
     main()
-=======
-    dataWithSchema = sqlContext.createDataFrame(rddOfRows,structSchema)
-    #dataWithSchema.distinct().show()
-    dataWithSchema.write.csv(cleanedCsvPath+"/formattetreskabsdata.csv",sep=";", header=True,mode="overwrite")
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     
     
     

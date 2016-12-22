@@ -4,7 +4,7 @@ Created on Jun 17, 2016
 @author: svanhmic
 '''
 
-import urllib2
+import urllib3
 import gzip
 import json
 import requests
@@ -54,12 +54,13 @@ def parseToXmlData(jData):
 
     dokData = jData["hits"]["hits"]
     xmlDok = []
+    http = urllib3.PoolManager()
     for i in range(0,len(dokData)):
         #print dokData[i]["_source"]["cvrNummer"]
         dokList = dokData[i]["_source"]["dokumenter"]#[0]["dokumentUrl"]
         for d in dokList:
             if d["dokumentMimeType"] == "application/xml":
-                x =urllib2.urlopen(d["dokumentUrl"])
+                x =http.urlopen("GET", d["dokumentUrl"])
                 
                 text_file = open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "w+")
                 text_file.write(x.read())
@@ -78,24 +79,15 @@ def parseToXmlData(jData):
 if __name__ == '__main__':
     
     
-<<<<<<< HEAD
-    start_date = date(2012,1,1)
-    end_date = date(2012,5,31)
-=======
     start_date = date(2016,5,2)
     end_date = date(2016,9,1)
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     d = start_date
     delta = timedelta(days=1)
     while d < end_date:
         sd = d.strftime("%Y-%m-%d")
         d += delta
         ed = d.strftime("%Y-%m-%d")
-<<<<<<< HEAD
         jData = getQueryData(sd,ed,1000000)
-=======
-        jData = getQueryData(sd,ed,1500)
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
         response = requests.get(index, data=json.dumps(jData),
                                      headers=HEADERS_FOR_JSON)
         response_data = response.json()

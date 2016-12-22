@@ -3,12 +3,9 @@ Created on Jun 13, 2016
 
 @author: svanhmic
 
-<<<<<<< HEAD
 This script creates a compiled csv file with the test csv records. 
 The csv files containing the accounts are converted from a column-based representation to a row based
-=======
-This script creates a compiled csv file with the test csv records. The csv files containing the accounts are converted from a column-based representation to a row based
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
+
 representation. meaning:
 account alpha
 var x , val x date x
@@ -33,25 +30,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from RegnskabsClass import Regnskaber
 import sys
-<<<<<<< HEAD
 #reload(sys)
 #sys.setdefaultencoding('utf-8')
-=======
-reload(sys)
-sys.setdefaultencoding('utf-8')
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
+
 
 sc = SparkContext("local[8]","importRegnskabs")
 sqlContext = SQLContext(sc)
 sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
-<<<<<<< HEAD
 folderPath = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testcsv"
 finalXML = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/finalXML"
 sparkDataLoc = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/csv"
-=======
-folderPath = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/csv"
-finalXML = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/finalXML"
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
+
 
 def convertToDate(col):
     try:
@@ -88,26 +77,18 @@ def extractFilesForTaxonomy(fileNamesDf,taxTypeDf):
     filteredCsvDf = intersectFilesDf.filter(intersectFilesDf["taxonomy"] == mostTaxonomy)
     return [str(f["file"]) for f in filteredCsvDf.collect()]
 
-<<<<<<< HEAD
+
 def main():
-=======
-#regnskab = Regnskaber(files[0])
-if __name__ == '__main__':
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     lengthUdf = F.udf(lambda x: len(x), IntegerType()) # user def methods 
     convertToDateUdf = F.udf(convertToDate,DateType()) # user def methods
     
     files = os.listdir(folderPath) # gets all the files in csv
-<<<<<<< HEAD
     print(len(files))
-=======
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     fileNamesDf = sqlContext.createDataFrame([Row(file=f) for f in files]) # import of csv files to dataframe   
     
     struct = StructType().add("file",StringType(),True).add("taxonomy",StringType(),True)
     taxTypeDf = sqlContext.read.csv(finalXML+"/taxlist.csv",header=False,schema=struct,sep=";")
     
-<<<<<<< HEAD
     #take out only the accounts with highest occurrence of taxonomy 
     recordList = extractFilesForTaxonomy(fileNamesDf,taxTypeDf)
     print("recordlist length: "+str(len(recordList)))
@@ -122,20 +103,6 @@ if __name__ == '__main__':
     df.printSchema()
     df.show()
     print(df.count())
-=======
-    recordList = extractFilesForTaxonomy(fileNamesDf,taxTypeDf)
-    #print(recordList)
-    list = []
-    for f in recordList:
-        list.append(Regnskaber(folderPath+"/"+f))
-        
-    print("Done with all file")
-    
-    df = sqlContext.createDataFrame(list)
-    del(list)
-    df.printSchema()
-    df.show()
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     #print(df.take(1))
     listCsvDf = df.drop("file").select(F.explode(F.col("field")))
     valueCsvDf = listCsvDf.select(F.regexp_replace(listCsvDf["col"]["name"],r"\w+:","").alias("name")
@@ -146,7 +113,6 @@ if __name__ == '__main__':
                                    ,listCsvDf["col"]["startDate"].alias("startDate")
                                    ,listCsvDf["col"]["endDate"].alias("endDate"))
     
-<<<<<<< HEAD
     #valueCsvDf.show(truncate=False)
     #orderedListCsvDf = listCsvDf.orderBy(listCsvDf["fieldlength"].desc()).select(listCsvDf["fieldlength"])
     #newDf = df.select(df["field"]["name"].alias("name"),df["field"]["value"].alias("value"))
@@ -154,16 +120,4 @@ if __name__ == '__main__':
 #regnskab = Regnskaber(files[0])
 if __name__ == '__main__':
     main()
-=======
-    valueCsvDf.show(truncate=False)
-    #orderedListCsvDf = listCsvDf.orderBy(listCsvDf["fieldlength"].desc()).select(listCsvDf["fieldlength"])
-    #newDf = df.select(df["field"]["name"].alias("name"),df["field"]["value"].alias("value"))
-    valueCsvDf.write.csv("/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/csv/regnskabsdata.csv",mode='overwrite',header=True,sep=";")
-    
-    
-    
-    #plt.eventplot(variableOccurance)
-    #plt.show()
-    #print(variableOccurance[0])
->>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
 
