@@ -9,6 +9,7 @@ import gzip
 import json
 import requests
 from datetime import date, timedelta
+from elasticsearch import Elasticsearch
 
 regn = "http://regnskaber.virk.dk/10275523/ZG9rdW1lbnRsYWdlcjovLzAzLzIxLzQ3L2NkLzFkLzFlYmItNDZlMi1iNDRiLTNlMGUxZDA3ZjJkNQ.xml"
 index = "http://distribution.virk.dk/offentliggoerelser/_search"
@@ -64,30 +65,40 @@ def parseToXmlData(jData):
                 text_file.write(x.read())
                 text_file.close()
                 
-                with gzip.open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "rb") as f:
-                    file_content = f.read()    
-                text_file = open(dataFolderXml+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+"cvr"+str(dokData[i]["_source"]["cvrNummer"])+".xml", "w+")
-                text_file.write(file_content)
-                text_file.close()
+                #with gzip.open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "rb") as f:
+                #    file_content = f.read()    
+                #text_file = open(dataFolderXml+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+"cvr"+str(dokData[i]["_source"]["cvrNummer"])+".xml", "w+")
+                #text_file.write(file_content)
+                #text_file.close()
                 xmlDok.append(d["dokumentUrl"])
     for i in xmlDok:
-        print i
-    print "number of xml-Documents collected is: ", len(xmlDok)
+        print(i)
+    print("number of xml-Documents collected is: ", len(xmlDok))
     
 if __name__ == '__main__':
     
     
-    start_date = date(2014,1,1)
-    end_date = date(2014,1,2)
+<<<<<<< HEAD
+    start_date = date(2012,1,1)
+    end_date = date(2012,5,31)
+=======
+    start_date = date(2016,5,2)
+    end_date = date(2016,9,1)
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     d = start_date
     delta = timedelta(days=1)
     while d < end_date:
         sd = d.strftime("%Y-%m-%d")
         d += delta
         ed = d.strftime("%Y-%m-%d")
-        jData = getQueryData(sd,ed,1000)
+<<<<<<< HEAD
+        jData = getQueryData(sd,ed,1000000)
+=======
+        jData = getQueryData(sd,ed,1500)
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
         response = requests.get(index, data=json.dumps(jData),
                                      headers=HEADERS_FOR_JSON)
         response_data = response.json()
-        parseToXmlData(response_data)    
+        parseToXmlData(response_data)
+        print(sd)    
 

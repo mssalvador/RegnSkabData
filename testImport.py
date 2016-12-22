@@ -10,6 +10,7 @@ from pyspark import SparkContext
 from pyspark.ml.linalg import Vectors,VectorUDT
 import pyspark.sql.functions as F
 from pyspark.sql import Row
+import sys
 
 sc = SparkContext("local[8]","testing")
 sqlContext = SQLContext(sc)
@@ -37,19 +38,10 @@ newDataDf = dataRdd.cartesian(dataRdd).map(lambda x: Row(v1=x[0]["vectors"],v2=x
 newDataSparseDf = dataSparseRdd.cartesian(dataSparseRdd).map(lambda x: Row(v1=x[0]["vectors"],v2=x[1]["vectors"])).toDF(["vector1","vector2"])
 newDataSparseDf.show(truncate = False)
 
-#newDataDf.select(multUdf(newDataDf["vector1"],newDataDf["vector2"]).alias("v1*v2"),absUdf(newDataDf["vector1"])).show()
+newDataDf.select(multUdf(newDataDf["vector1"],newDataDf["vector2"]).alias("v1*v2"),absUdf(newDataDf["vector1"])).show()
 testing = newDataSparseDf.select(sparseQuickAddU(newDataSparseDf["vector1"],newDataSparseDf["vector2"]).alias("spv1*spv2")).show(truncate=False)
 
-start_date = date(2013,1,1)
-end_date = date(2014,1,1)
-d = start_date
-delta = timedelta(days=1)
-while d <= end_date:
-    print "Start date: " , d.strftime("%Y-%m-%d")
-    d += delta
-    print "End date: " , d.strftime("%Y-%m-%d")
-
-
+print(sys.path)
 
 if __name__ == '__main__':
     pass
