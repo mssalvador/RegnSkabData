@@ -2,6 +2,11 @@
 Created on Oct 27, 2016
 
 @author: svanhmic
+<<<<<<< HEAD
+@license: Apache 2.0
+@summary: Contains methods for extracting context and unit references
+=======
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
 '''
 
 import re
@@ -16,6 +21,51 @@ from xml.dom import expatbuilder
 CSVFILES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testcsv"
 NEWPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testXML"
        
+<<<<<<< HEAD
+# def getSecondContexts(path):
+#     """ 
+#     First atempt to make a parser for unit and context references. 
+#     
+#     Input
+#         path: The path to the diretory where the files are stored. 
+#     
+#     Output
+#         dokArr: A dictionary with contextsrefs as index and values as the translation
+#     """
+#     files = os.listdir(path)
+#     contextRe = re.compile(r"<\w*:*context id.*>.*</.*context>",flags=re.MULTILINE)
+#     contextStart = re.compile(r"<(\w+:|\w*)context id.*>",flags=re.MULTILINE)
+#     contextEnd = re.compile(r"</[\w\W]*context>")
+# 
+#     dokArr = {}
+#     for file in files:
+#         doesPrint = False
+#         dokString = "<xbrl>"
+#         with open(path+"/"+file) as f:
+#             for line in f:
+#                 start = contextStart.search(line)
+#                 end = contextEnd.search(line)
+#                 conRe = contextRe.findall(line)
+#                 if start and not end:
+#                     doesPrint = True
+#                     #print("start: "+str(start.group()))
+#                 elif conRe:
+#                     dokString += conRe[0]
+#                     #print("conre: "+dokString)
+#                     continue
+#                 if doesPrint:
+#                     if start:
+#                         #print("start: "+str(start.group()))
+#                         dokString += start.group()
+#                     else:
+#                         dokString += line
+#                 if not start and end:
+#                     doesPrint = False
+#                     #print("end: "+str(end.group()))
+#         dokArr[file] = re.sub("[\n\s\t]+"," ", dokString+"</xbrl>",flags=re.MULTILINE )
+#     #print(dokString)
+#     return dokArr
+=======
 def getSecondContexts(path):
     """ 
     First atempt to make a parser for unit and context references. 
@@ -59,6 +109,7 @@ def getSecondContexts(path):
         dokArr[file] = re.sub("[\n\s\t]+"," ", dokString+"</xbrl>",flags=re.MULTILINE )
     #print(dokString)
     return dokArr
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
 
 def getContextRef(docPath):
     """ 
@@ -88,7 +139,11 @@ def getContextRef(docPath):
         #print(contexts)
         return contextDic
     except:
+<<<<<<< HEAD
+        print("Well this is embarresing, contexts are not present in: "+docPath)
+=======
         print("Well this is embarresing")
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
         return None
     
 def getUnitRef(docPath):
@@ -113,7 +168,11 @@ def getUnitRef(docPath):
             unitDic[i.getAttribute("id")] = i.getElementsByTagName(pref+"measure")[0].firstChild.nodeValue
         return unitDic
     except:
+<<<<<<< HEAD
+        print("Well this is embarresing, units are not present in:"+docPath)
+=======
         print("Well this is embarresing")
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
         return None
     
 def replaceUnitsAndContexts(docPath,csvPath):
@@ -138,7 +197,11 @@ def replaceUnitsAndContexts(docPath,csvPath):
             file = csv.DictReader(csvfile)
             #fieldNames = [fieldName.decode("ascii").encode("utf-8") for fieldName in file.fieldnames]
             fieldNames = file.fieldnames
+<<<<<<< HEAD
+            #print(fieldNames)
+=======
             print(fieldNames)
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
             for row in file:
                 if row["unitRef"] != "":
                     if row["unitRef"] == None:
@@ -159,10 +222,22 @@ def replaceUnitsAndContexts(docPath,csvPath):
             outputFile = csv.DictWriter(outputcsv,fieldnames=fieldNames)
             outputFile.writeheader()
             outputFile.writerows(newRows)
+<<<<<<< HEAD
+        return str(csvPath)+": OK"
+    except TypeError:
+        #print(row["contextRef"])
+        print("contexts: ",contextDict)
+        print("units: ",unitDict)
+        return str(csvPath)+str(contextDict)+str(unitDict)
+    except OSError:
+        print("the file was not found")
+        return str(csvPath)+":Not Found"
+=======
     except OSError:
         print("the file was not found")
     except KeyError:
         print("the file is already processed")
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
         
         
 def postProcessing(docPath,csvPath,checkFile=None):
@@ -183,9 +258,28 @@ def postProcessing(docPath,csvPath,checkFile=None):
             
     replaceUnitsAndContexts(docPath,csvPath)  
     
+<<<<<<< HEAD
+if __name__ == '__main__':
+    argsLength = len(sys.argv)
+    if argsLength == 1:
+        NEWPATH = sys.argv[1]
+    elif argsLength == 2:
+        NEWPATH = sys.argv[1]
+        CSVFILES = sys.argv[2]
+    else:
+        CSVFILES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testcsv"
+        NEWPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testXML"
+       
+    try:
+        files = os.listdir(NEWPATH)
+        postProcessing(NEWPATH+"/2011-09-2733961871.xml",CSVFILES+"/2011-09-2733961871.xml.csv")
+    except:
+    
+=======
 if __name__ == '__main__': 
     files = os.listdir(NEWPATH)
     postProcessing(NEWPATH+"/2011-09-2733961871.xml",CSVFILES+"/2011-09-2733961871.xml.csv")
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     
     
     

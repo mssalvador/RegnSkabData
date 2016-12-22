@@ -7,6 +7,12 @@ Created on Sep 14, 2016
 from RegnskabsClass import Regnskaber
 import os
 import re
+<<<<<<< HEAD
+import sys
+import contextlib 
+import io
+=======
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
 from datetime import datetime
 from decimal import Decimal
 path = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/csv"
@@ -33,6 +39,19 @@ class ProClass:
     @tmp.deleter
     def tmp(self):
         del self._tmp
+<<<<<<< HEAD
+
+
+def foo():
+    print("heeeeeeeeeeeeeej!")   
+
+if __name__ == "__main__":
+    
+    with open("/tmp/log.txt",'w+') as log:
+        with contextlib.redirect_stdout(log):
+            foo() 
+
+=======
     
 
 if __name__ == "__main__":
@@ -51,3 +70,4 @@ if __name__ == "__main__":
     p.tmp = 1
     print(p.tmp)
     del p.tmp
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07

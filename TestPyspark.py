@@ -16,11 +16,16 @@ from datetime import datetime
 import re
 #from RegnskabsClass import Regnskaber
 
+<<<<<<< HEAD
+
+sc = SparkContext("local[8]","TestPyspark")#pyFiles=['/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py'])
+=======
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 sc = SparkContext("local[8]","TestPyspark" )#pyFiles=['/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py'])
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
 sqlContext = SQLContext(sc)
 #sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py')
 path = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/csv"
@@ -31,6 +36,17 @@ cleanedCsvPath = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sp
 # And divide the plots up such that labels can be seen
 if __name__ == '__main__':
     dfRegnskabsVal = sqlContext.read.csv(path=cleanedCsvPath+"/pivotRowDataValues.csv", sep=";" , header=True,encoding="utf-8",dateFormat="yyyy-mm-dd",nullValue="none")
+<<<<<<< HEAD
+    #df = sqlContext.read.csv(cleanedCsvPath+"/formattetreskabsdata.csv",sep=";", header=True, encoding="utf-8",inferSchema=True,dateFormat="yyyy-mm-dd",)
+    dfRegnskabsVal.printSchema()
+    for line in df.take(10):
+        print(line)
+    #print(df.select(df["DisclosureOfInvestments"]).orderBy(F.col("DisclosureOfInvestments").desc()).distinct().take(10))
+    #dfColNameAndTypes = df.d    types
+    #stringColsInDf = map(lambda x: str(x[0]),filter(lambda x: x[1] != "string",dfColNameAndTypes))
+    #df.select(stringColsInDf[470:480]).show()
+    #print(len(stringColsInDf))
+=======
     df = sqlContext.read.csv(cleanedCsvPath+"/formattetreskabsdata.csv",sep=";", header=True, encoding="utf-8",inferSchema=True,dateFormat="yyyy-mm-dd",)
     df.printSchema()
     
@@ -42,6 +58,7 @@ if __name__ == '__main__':
     df.select('*').show()
     df.select(stringColsInDf[470:480]).show()
     print(len(stringColsInDf))
+>>>>>>> 44c1327efbcacd426e3974403ebc8f9a30b76a07
     #print()
     #for p in stringColsInDf:
     #    print(p)
