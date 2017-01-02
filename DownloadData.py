@@ -17,10 +17,8 @@ from multiprocessing import Pool
 regn = "http://regnskaber.virk.dk/10275523/ZG9rdW1lbnRsYWdlcjovLzAzLzIxLzQ3L2NkLzFkLzFlYmItNDZlMi1iNDRiLTNlMGUxZDA3ZjJkNQ.xml"
 index = "http://distribution.virk.dk/offentliggoerelser/_search"
 #jList = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/regnskab.json"
-dataFolderZip ="/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/zipped"
-dataFolderXml = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testXML"
 site = "http://distribution.virk.dk/offentliggoerelser"
-
+dataFolderXml = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testXML"
 HEADERS_FOR_JSON = {
                     
                     'accept': "application/json; charset=utf-8",
@@ -106,12 +104,18 @@ def parseToXmlData(jData):
     
 if __name__ == '__main__':
     #the main method 
-
+    #usage python3 DownloadData.py startdate enddate pathToSaveFile
+    
     if len(sys.argv) == 2:
         start_date = datetime.strptime(sys.argv[1],"%Y-%m-%d")
     elif len(sys.argv) == 3:
         start_date = datetime.strptime(sys.argv[1],"%Y-%m-%d")
         end_date = datetime.strptime(sys.argv[2],"%Y-%m-%d")
+    elif len(sys.argv) == 4:
+        start_date = datetime.strptime(sys.argv[1],"%Y-%m-%d")
+        end_date = datetime.strptime(sys.argv[2],"%Y-%m-%d")
+        global dataFolderXml
+        dataFolderXml = sys.argv[3]
     else:
         start_date = date(2016,4,1)
         end_date = date(2016,4,2)
