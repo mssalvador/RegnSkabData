@@ -4,12 +4,12 @@ Created on Jun 17, 2016
 @author: svanhmic
 '''
 
-import urllib3
 import urllib
 import gzip
 import json
+import sys
 import requests
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from elasticsearch import Elasticsearch
 from fileinput import filename
 from multiprocessing import Pool
@@ -105,10 +105,17 @@ def parseToXmlData(jData):
     print("number of xml-Documents collected is: ", len(xmlDok))
     
 if __name__ == '__main__':
+    #the main method 
+
+    if len(sys.argv) == 2:
+        start_date = datetime.strptime(sys.argv[1],"%Y-%m-%d")
+    elif len(sys.argv) == 3:
+        start_date = datetime.strptime(sys.argv[1],"%Y-%m-%d")
+        end_date = datetime.strptime(sys.argv[2],"%Y-%m-%d")
+    else:
+        start_date = date(2016,4,1)
+        end_date = date(2016,4,2)
     
-    
-    start_date = date(2016,4,1)
-    end_date = date(2016,4,2)
     d = start_date
     delta = timedelta(days=1)
     while d < end_date:
