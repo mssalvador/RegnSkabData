@@ -93,7 +93,7 @@ def parseToXmlData(jData):
     #xmlDok = [openAndCollectXML(i)  for i in dokList]
     
     xmlDok = pool.map(openAndCollectXML,updatedDoklist)
-    print("number of xml-Documents collected is: ", len(xmlDok))
+    print("number of xml-Documents collected is:  ", len(xmlDok))
     #for i in range(0,len(dokData)):
     #    #print dokData[i]["_source"]["cvrNummer"]
     #    dokList = dokData[i]["_source"]["dokumenter"]#[0]["dokumentUrl"]
