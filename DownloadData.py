@@ -5,17 +5,20 @@ Created on Jun 17, 2016
 '''
 
 import urllib3
+import urllib
 import gzip
 import json
 import requests
 from datetime import date, timedelta
 from elasticsearch import Elasticsearch
+from fileinput import filename
+from multiprocessing import Pool
 
 regn = "http://regnskaber.virk.dk/10275523/ZG9rdW1lbnRsYWdlcjovLzAzLzIxLzQ3L2NkLzFkLzFlYmItNDZlMi1iNDRiLTNlMGUxZDA3ZjJkNQ.xml"
 index = "http://distribution.virk.dk/offentliggoerelser/_search"
 #jList = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/regnskab.json"
 dataFolderZip ="/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/zipped"
-dataFolderXml = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/xml"
+dataFolderXml = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testXML"
 site = "http://distribution.virk.dk/offentliggoerelser"
 
 HEADERS_FOR_JSON = {
@@ -47,40 +50,65 @@ def getQueryData(from_date=None,to_date=None,size=None):
     #print data
     return data
 
+def openAndCollectXML(pathList):
+    
+    
+    #print(pathList[2])
+    if pathList[2] is not None:
+        #Download the .gz files 
+        urllib.request.urlretrieve(pathList[2],filename=dataFolderXml+"/"+str(pathList[1])+str(pathList[0])+".gz")
+    else:
+        print("Not an adress"+str(pathList[2]))
+
+    return str(pathList[2])
+
+def extractDokUrl(lst):
+    output = list(filter(lambda x: x['dokumentMimeType'] == "application/xml", lst))
+    #print(len(output))
+    try:
+        return output[0]["dokumentUrl"]
+    except IndexError:
+        #print("No xml file")
+        return None
+
 def parseToXmlData(jData):
     '''
         takes a json file and extracts the attachments
     '''
-
+    pool = Pool(processes=4)
     dokData = jData["hits"]["hits"]
-    xmlDok = []
-    http = urllib3.PoolManager()
-    for i in range(0,len(dokData)):
-        #print dokData[i]["_source"]["cvrNummer"]
-        dokList = dokData[i]["_source"]["dokumenter"]#[0]["dokumentUrl"]
-        for d in dokList:
-            if d["dokumentMimeType"] == "application/xml":
-                x =http.urlopen("GET", d["dokumentUrl"])
-                
-                text_file = open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "w+")
-                text_file.write(x.read())
-                text_file.close()
+    dokList = [(v["_source"]["cvrNummer"]
+                     ,v["_source"]["regnskab"]["regnskabsperiode"]["startDato"]
+                     ,extractDokUrl(v["_source"]["dokumenter"])) for v in dokData]
+    
+    #xmlDok = [openAndCollectXML(i)  for i in dokList]
+    xmlDok = pool.map(openAndCollectXML,dokList)
+    #for i in range(0,len(dokData)):
+    #    #print dokData[i]["_source"]["cvrNummer"]
+    #    dokList = dokData[i]["_source"]["dokumenter"]#[0]["dokumentUrl"]
+    #    for d in dokList:
+    #        if d["dokumentMimeType"] == "application/xml":
+    #            x = http.urlopen("GET", d["dokumentUrl"])
+    #            text_file = open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "w+")
+    #            text_file.write(str(x.data))
+    #            text_file.close()
                 
                 #with gzip.open(dataFolderZip+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(dokData[i]["_source"]["cvrNummer"])+".gz", "rb") as f:
                 #    file_content = f.read()    
                 #text_file = open(dataFolderXml+"/"+str(dokData[i]["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+"cvr"+str(dokData[i]["_source"]["cvrNummer"])+".xml", "w+")
                 #text_file.write(file_content)
                 #text_file.close()
-                xmlDok.append(d["dokumentUrl"])
-    for i in xmlDok:
-        print(i)
+    #            xmlDok.append(d["dokumentUrl"])
+    
+    #for i in dokList:
+    #    print(i)
     print("number of xml-Documents collected is: ", len(xmlDok))
     
 if __name__ == '__main__':
     
     
-    start_date = date(2016,5,2)
-    end_date = date(2016,9,1)
+    start_date = date(2016,4,1)
+    end_date = date(2016,4,2)
     d = start_date
     delta = timedelta(days=1)
     while d < end_date:
