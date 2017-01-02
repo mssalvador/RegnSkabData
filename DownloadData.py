@@ -5,9 +5,10 @@ Created on Jun 17, 2016
 '''
 
 import urllib
-import gzip
+import os
 import json
 import sys
+import re
 import requests
 from datetime import date, timedelta, datetime
 from elasticsearch import Elasticsearch
@@ -53,8 +54,8 @@ def openAndCollectXML(pathList):
     
     #print(pathList[2])
     if pathList[2] is not None:
-        #Download the .gz files 
-        urllib.request.urlretrieve(pathList[2],filename=dataFolderXml+"/"+str(pathList[1])+str(pathList[0])+".gz")
+        #Download the .gz files and saving them as files: date-cvrnumber.gz
+        urllib.request.urlretrieve(pathList[2],filename=dataFolderXml+"/"+str(pathList[0])+"/"+str(pathList[1])+".gz")
     else:
         print("Not an adress"+str(pathList[2]))
 
@@ -75,12 +76,24 @@ def parseToXmlData(jData):
     '''
     pool = Pool(processes=4)
     dokData = jData["hits"]["hits"]
-    dokList = [(v["_source"]["cvrNummer"]
-                     ,v["_source"]["regnskab"]["regnskabsperiode"]["startDato"]
+    
+    #Extract offentliggørelsestidspunkt for the current day
+    lf = re.match("\d{4}-\d{2}-\d{2}",dokData[0]["_source"]["offentliggoerelsesTidspunkt"])
+    print(lf.group(0)) 
+    dokList = [(lf.group(0),str(v["_source"]["regnskab"]["regnskabsperiode"]["startDato"])+str(v["_source"]["cvrNummer"])
                      ,extractDokUrl(v["_source"]["dokumenter"])) for v in dokData]
     
+    if os.path.isdir(dataFolderXml+"/"+lf.group(0)) == False:
+        os.mkdir(dataFolderXml+"/"+str(lf.group(0)))
+    exsistingFiles = os.listdir(dataFolderXml+"/"+str(lf.group(0)))
+    updatedDoklist = list(filter(lambda x: x[1]+".gz" not in exsistingFiles,dokList))
+    #print(updatedDoklist)
+    
+    print("number in list: ",len(updatedDoklist))
     #xmlDok = [openAndCollectXML(i)  for i in dokList]
-    xmlDok = pool.map(openAndCollectXML,dokList)
+    
+    xmlDok = pool.map(openAndCollectXML,updatedDoklist)
+    print("number of xml-Documents collected is: ", len(xmlDok))
     #for i in range(0,len(dokData)):
     #    #print dokData[i]["_source"]["cvrNummer"]
     #    dokList = dokData[i]["_source"]["dokumenter"]#[0]["dokumentUrl"]
@@ -100,11 +113,11 @@ def parseToXmlData(jData):
     
     #for i in dokList:
     #    print(i)
-    print("number of xml-Documents collected is: ", len(xmlDok))
+    
     
 if __name__ == '__main__':
     #the main method 
-    #usage python3 DownloadData.py startdate enddate pathToSaveFile
+    #usage python3 DownloadData.py startdate enddate pathToSaveFileRootDirectory
     
     if len(sys.argv) == 2:
         start_date = datetime.strptime(sys.argv[1],"%Y-%m-%d")
