@@ -206,4 +206,5 @@ if __name__ == '__main__':
         files = os.listdir(NEWPATH)
         postProcessing(NEWPATH+"/2011-09-2733961871.xml",CSVFILES+"/2011-09-2733961871.xml.csv")
     except:
+        print("none")
     

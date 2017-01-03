@@ -11,16 +11,17 @@ import logging
 import multiprocessing
 import sys
 import io
-import GetContexts
 import contextlib
-from ExportXbrlToCsv import extractXbrlToCsv
-sys.path.insert(0, '/home/svanhmic/Programs/Arelle') # inserts Arelle to the pythonpath, apperently
+import zipfile
+import  ExportXbrlToCsv as exp
+import GetContexts
+sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
 
-PATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/xml"
-NEWPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/finalXML"
+PATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testXML"
+NEWPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanXML"
 TAXPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/tax"
-ZIPFLES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/zipped"
-CSVFILES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testcsv"
+ZIPFLES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testzipped"
+CSVFILES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanCSV"
 TAXDICT = {}
 TAXDICT["20120101"] = "/dcca20120101"
 TAXDICT["20121001"] = "/XBRL20121001"
@@ -31,6 +32,19 @@ TAXDICT["20111220"] = "/XBRL20111220_IFRS"
 TAXDICT["20131220"] = "/XBRL20131220_IFRS"
 TAXDICT["20141220"] = "/XBRL20141220_IFRS"
 
+def acessFolder(parrentInputFolder, parrentOutputFolder, dictTaxonomy, taxonomyPath, remOld=False):
+    '''
+    This method opens the parrent folder containing all subfolders with xml data
+    '''
+    
+    for l in os.listdir(parrentInputFolder):
+        subFolder = parrentInputFolder+"/"+l
+        try:
+            os.mkdir(parrentOutputFolder+"/"+l)#create emptyoutput subfolders
+        except FileExistsError:
+            print("folder is there all ready")
+        
+        acessFiles(subFolder, taxonomyPath, dictTaxonomy, parrentOutputFolder+"/"+l, remOld)
 
 def acessFiles(path,taxpath,taxdict,newFolder,removeOld = True):
     '''
@@ -39,7 +53,6 @@ def acessFiles(path,taxpath,taxdict,newFolder,removeOld = True):
     '''
     files = os.listdir(path)
     taxonomyList = []
-    taxonomyDict = {}
     for t in taxdict.items():
         taxonomyList = taxonomyList+[taxpath+str(t[1])+"/"+str(t[0])+"/"+str(w) for w in os.listdir(taxpath+str(t[1]))]
     finalTaxList = []
@@ -85,16 +98,23 @@ def acessFiles(path,taxpath,taxdict,newFolder,removeOld = True):
     print("Inserted taxonomy done!")
             
 def unZipCollection(location,newLoc):
-    files = os.listdir(location)
+    
+    #gets the folders with all dates, zip files are in the folders
+
     #print files[0:10]
-    for file in files:
-        xmlFile = re.sub("gz", "xml", file)
-        print(xmlFile)
-        with gzip.open(location+"/"+file,"rb") as zippedFile:
-            file_content = zippedFile.read()
-        text_file = open(newLoc+"/"+xmlFile, "w+")
-        text_file.write(file_content)
-        text_file.close()
+    for folder in os.listdir(location):
+        try: 
+            os.mkdir(newLoc+"/"+folder)
+        except FileExistsError:
+            print("folder "+str(folder)+" exists") 
+            
+        for file in os.listdir(location+"/"+folder):            
+            xmlFile = re.sub("gz", "xml", file)
+            print(xmlFile)
+            with gzip.open(location+"/"+folder+"/"+file,"rt") as zippedFile:
+                with open(newLoc+"/"+folder+"/"+xmlFile, "w+") as f:
+                    for l in zippedFile.read():
+                        f.write(l)
     print("Unzipping done!")
     
     
@@ -111,14 +131,21 @@ def toCSVFromXML(path,csvDir):
 def parallelToCsvFromXmlApiStyle(inoutFile):
     infile = inoutFile[0] # the xmlfile
     outfile = inoutFile[1] # the csv file output
-    if os.path.isfile(outfile) is False:
-        extractXbrlToCsv(infile, outfile).run()
-        #postProcessing(infile,outfile) # Can't figure this out, very annoying 
-        print(str(os.getpid())+", File: "+infile+", is Done!")
-    else:
-        print(outfile+": is already created!")
+    try:
+        if ".csv" in infile:
+            print("the file is a csv file") 
+        elif os.path.isfile(outfile) is False:
+            exp.extractXbrlToCsv(infile, outfile).run()
+            #postProcessing(infile,outfile) # Can't figure this out, very annoying 
+            print(str(os.getpid())+", File: "+infile+", is Done!")
+
+        else:
+            print(outfile+": is already created!")
+    except:
+        print("infile: "+infile)
+        print("infile: "+outfile)     
         
-        
+          
 def postProcessing(docPath,csvPath,logFile="/tmp/log.txt"):
     """ 
     Wrapper for replaceUnitsAndContexts such that a naive "version" control can be made and parallel processing can be initiated.
@@ -134,24 +161,39 @@ def postProcessing(docPath,csvPath,logFile="/tmp/log.txt"):
         try: 
             log.write(GetContexts.replaceUnitsAndContexts(docPath,csvPath)+"\n")
         except KeyError:
-            print(csvPath+"the file is already processed\n")
-
+            print(csvPath+" the file is already processed\n")
+            
+def convertFromXmlToCsv(parrentXMLFolder,parrentCSVFolder):
+    '''
+    Creates a tuple containing folder paths in order to create the appropriate csv files
+    '''
+    subFiles = os.listdir(parrentXMLFolder)
+    allFiles = []
+    for subF in subFiles:
+        allFiles += [[parrentXMLFolder+"/"+subF+"/"+f,parrentCSVFolder+"/"+f+".csv"] for f in os.listdir(parrentXMLFolder+"/"+subF)]
+    #for f in fileTuple:
+    #    print(f)
+    return allFiles
     
 if __name__ == '__main__':
-    #unZipCollection(ZIPFLES, PATH)
-    #acessFiles(PATH,TAXPATH,TAXDICT,NEWPATH,removeOld=False)
-    files = os.listdir(NEWPATH)
-    files = tuple([[NEWPATH+"/"+f,CSVFILES+"/"+f+".csv"] for f in files]) 
-    #The conversion takes place here
-    pool = multiprocessing.Pool(processes=8)
-    pool.map(parallelToCsvFromXmlApiStyle,files[:20000])
+    unZipCollection(ZIPFLES, PATH)
+    acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
+    files = tuple(convertFromXmlToCsv(NEWPATH,CSVFILES))
     
-    csvFiles = os.listdir(CSVFILES)
-    allFiles = tuple([[NEWPATH+"/"+re.sub(r"\.csv","",f),CSVFILES+"/"+f] for f in csvFiles])
-    print(allFiles[:10])
+    #The conversion takes place here
+    pool = multiprocessing.Pool(processes=4)
+    pool.map(parallelToCsvFromXmlApiStyle,files)
+    
+    print(len(files))
+    print(len(os.listdir(CSVFILES)))
+    
+    #csvFiles = os.listdir(CSVFILES)
+    #allFiles = tuple([[NEWPATH+"/"+re.sub(r"\.csv","",f),CSVFILES+"/"+f] for f in csvFiles])
+    #print(allFiles[:10])
     
     #Units and References are added to the csv-files 
-    for file in allFiles:
+    for file in files:
+        print(file[0],"\t",file[1])
         postProcessing(file[0],file[1])
     
     

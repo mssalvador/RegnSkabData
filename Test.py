@@ -4,7 +4,7 @@ Created on Sep 14, 2016
 @author: svanhmic
 '''
 
-from RegnskabsClass import Regnskaber
+from RegnSkabData import RegnskabsClass
 import os
 import re
 import sys

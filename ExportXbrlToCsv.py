@@ -71,7 +71,7 @@ class extractXbrlToCsv(Cntlr.Cntlr):
         self.close()
             
 # if python is initiated as a main_dep program, start the controller
-# if __name__ == "__main__":
-#     # create the controller and start it running
-#     path = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/finalXML/2014-01-0187139816.xml"
-#     extractXbrlToCsv(path).run()
+if __name__ == "__main__":
+    # create the controller and start it running
+    path = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanXML/2014-01-04/2012-01-0133061544.xml"
+    extractXbrlToCsv(path,OutFile="/tmp/foo2.csv").run()
