@@ -34,7 +34,7 @@ import sys
 #sys.setdefaultencoding('utf-8')
 
 
-sc = SparkContext("local[8]","importRegnskabs")
+sc = SparkContext("local[*]","importRegnskabs")
 sqlContext = SQLContext(sc)
 sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
 folderPath = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testcsv"

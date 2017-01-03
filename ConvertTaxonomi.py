@@ -7,12 +7,9 @@ import re
 import os 
 import fileinput
 import gzip
-import logging
 import multiprocessing
 import sys
-import io
-import contextlib
-import zipfile
+from shutil import copyfile
 import  ExportXbrlToCsv as exp
 import GetContexts
 sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
@@ -131,9 +128,13 @@ def toCSVFromXML(path,csvDir):
 def parallelToCsvFromXmlApiStyle(inoutFile):
     infile = inoutFile[0] # the xmlfile
     outfile = inoutFile[1] # the csv file output
+
     try:
         if ".csv" in infile:
-            print("the file is a csv file") 
+            dateFolder = re.search(r"\d{4}\-\d{2}\-\d{2}", infile)
+            #print(dateFolder.group(0))
+            copyfile(infile,outfile+dateFolder.group(0)+".csv")
+            print(infile+" is a csv file") 
         elif os.path.isfile(outfile) is False:
             exp.extractXbrlToCsv(infile, outfile).run()
             #postProcessing(infile,outfile) # Can't figure this out, very annoying 
@@ -141,9 +142,10 @@ def parallelToCsvFromXmlApiStyle(inoutFile):
 
         else:
             print(outfile+": is already created!")
+
     except:
         print("infile: "+infile)
-        print("infile: "+outfile)     
+        print("outfile: "+outfile)     
         
           
 def postProcessing(docPath,csvPath,logFile="/tmp/log.txt"):
@@ -176,8 +178,8 @@ def convertFromXmlToCsv(parrentXMLFolder,parrentCSVFolder):
     return allFiles
     
 if __name__ == '__main__':
-    unZipCollection(ZIPFLES, PATH)
-    acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
+    #unZipCollection(ZIPFLES, PATH)
+    #acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
     files = tuple(convertFromXmlToCsv(NEWPATH,CSVFILES))
     
     #The conversion takes place here
