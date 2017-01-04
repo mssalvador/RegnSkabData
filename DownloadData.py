@@ -53,11 +53,15 @@ def openAndCollectXML(pathList):
     
     
     #print(pathList[2])
-    if pathList[2] is not None:
-        #Download the .gz files and saving them as files: date-cvrnumber.gz
-        urllib.request.urlretrieve(pathList[2],filename=dataFolderXml+"/"+str(pathList[0])+"/"+str(pathList[1])+".gz")
-    else:
-        print("Not an adress"+str(pathList[2]))
+    try:
+        if pathList[2] is not None:
+            #Download the .gz files and saving them as files: date-cvrnumber.gz
+            urllib.request.urlretrieve(pathList[2],filename=dataFolderXml+"/"+str(pathList[0])+"/"+str(pathList[1])+".gz")
+        else:
+            print("Not an adress"+str(pathList[2]))
+    except urllib.error.URLError as error:
+        print("this failed",error)
+        urllib.request.urlcleanup()
 
     return str(pathList[2])
 
