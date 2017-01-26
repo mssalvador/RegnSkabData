@@ -17,7 +17,7 @@ sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pyt
 PATH = "/home/biml/bigdata/data_files/regnskaber/testXML"
 NEWPATH = "/home/biml/bigdata/data_files/regnskaber/cleanXML"
 TAXPATH = "/home/biml/bigdata/data_files/regnskaber/tax"
-ZIPFLES = "/home/biml/bigdata/data_files/regnskaber/testzipped"
+ZIPFLES = "/home/biml/bigdata/data_files/regnskaber/testZipped"
 CSVFILES = "/home/biml/bigdata/data_files/regnskaber/cleanCSV"
 TAXDICT = {}
 TAXDICT["20120101"] = "/dcca20120101"
