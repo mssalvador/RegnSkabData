@@ -14,11 +14,11 @@ import  ExportXbrlToCsv as exp
 import GetContexts
 sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
 
-PATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testXML"
-NEWPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanXML"
-TAXPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/tax"
-ZIPFLES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testzipped"
-CSVFILES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanCSV"
+PATH = "/home/biml/bigdata/data_files/regnskaber/testXML"
+NEWPATH = "/home/biml/bigdata/data_files/regnskaber/cleanXML"
+TAXPATH = "/home/biml/bigdata/data_files/regnskaber/tax"
+ZIPFLES = "/home/biml/bigdata/data_files/regnskaber/testzipped"
+CSVFILES = "/home/biml/bigdata/data_files/regnskaber/cleanCSV"
 TAXDICT = {}
 TAXDICT["20120101"] = "/dcca20120101"
 TAXDICT["20121001"] = "/XBRL20121001"
@@ -178,8 +178,8 @@ def convertFromXmlToCsv(parrentXMLFolder,parrentCSVFolder):
     return allFiles
     
 if __name__ == '__main__':
-    #unZipCollection(ZIPFLES, PATH)
-    #acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
+    unZipCollection(ZIPFLES, PATH)
+    acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
     files = tuple(convertFromXmlToCsv(NEWPATH,CSVFILES))
     
     #The conversion takes place here
