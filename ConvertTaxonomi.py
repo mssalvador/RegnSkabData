@@ -12,7 +12,7 @@ import sys
 from shutil import copyfile
 import  ExportXbrlToCsv as exp
 import GetContexts
-sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
+sys.path.insert(0, "/home/biml/Arelle") # inserts Arelle to the pythonpath, apperently
 
 PATH = "/home/biml/bigdata/data_files/regnskaber/testXML"
 NEWPATH = "/home/biml/bigdata/data_files/regnskaber/cleanXML"
