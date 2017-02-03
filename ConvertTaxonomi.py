@@ -178,7 +178,7 @@ def convertFromXmlToCsv(parrentXMLFolder,parrentCSVFolder):
     subFiles = os.listdir(parrentXMLFolder)
     allFiles = []
     for subF in subFiles:
-        print(subF)
+        #print(subF)
         allFiles += [[parrentXMLFolder+"/"+subF+"/"+f,parrentCSVFolder+"/"+f+".csv"] for f in os.listdir(parrentXMLFolder+"/"+subF)]
     #for f in fileTuple:
     #    print(f)
@@ -189,9 +189,10 @@ if __name__ == '__main__':
     #acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
     files = tuple(convertFromXmlToCsv(NEWPATH,CSVFILES))
     
+    print(len(files))
     #The conversion takes place here
-    #pool = multiprocessing.Pool(processes=4)
-    #pool.map(parallelToCsvFromXmlApiStyle,files)
+    pool = multiprocessing.Pool(processes=4)
+    pool.map(parallelToCsvFromXmlApiStyle,files)
     
     #print(len(files))
     #print(len(os.listdir(CSVFILES)))
