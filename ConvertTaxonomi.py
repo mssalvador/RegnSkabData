@@ -13,12 +13,15 @@ from shutil import copyfile
 import  ExportXbrlToCsv as exp
 import GetContexts
 sys.path.insert(0, "/home/biml/Arelle") # inserts Arelle to the pythonpath, apperently
+#sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
 
-PATH = "/home/biml/bigdata/data_files/regnskaber/testXML"
-NEWPATH = "/home/biml/bigdata/data_files/regnskaber/cleanXML"
-TAXPATH = "/home/biml/bigdata/data_files/regnskaber/tax"
-ZIPFLES = "/home/biml/bigdata/data_files/regnskaber/testZipped"
-CSVFILES = "/home/biml/bigdata/data_files/regnskaber/cleanCSV"
+USER = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/"
+ClusterUSER = "home/biml/bigdata/data_files/regnskaber/"
+PATH = ClusterUSER+"testXML"
+NEWPATH = ClusterUSER+"cleanXML"
+TAXPATH = ClusterUSER+"tax"
+ZIPFLES = ClusterUSER+"testZipped"
+CSVFILES = ClusterUSER+"cleanCSV"
 TAXDICT = {}
 TAXDICT["20120101"] = "/dcca20120101"
 TAXDICT["20121001"] = "/XBRL20121001"
@@ -172,30 +175,31 @@ def convertFromXmlToCsv(parrentXMLFolder,parrentCSVFolder):
     subFiles = os.listdir(parrentXMLFolder)
     allFiles = []
     for subF in subFiles:
+        print(subF)
         allFiles += [[parrentXMLFolder+"/"+subF+"/"+f,parrentCSVFolder+"/"+f+".csv"] for f in os.listdir(parrentXMLFolder+"/"+subF)]
     #for f in fileTuple:
     #    print(f)
     return allFiles
     
 if __name__ == '__main__':
-    unZipCollection(ZIPFLES, PATH)
-    acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
+    #unZipCollection(ZIPFLES, PATH)
+    #acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
     files = tuple(convertFromXmlToCsv(NEWPATH,CSVFILES))
     
     #The conversion takes place here
-    pool = multiprocessing.Pool(processes=4)
-    pool.map(parallelToCsvFromXmlApiStyle,files)
+    #pool = multiprocessing.Pool(processes=4)
+    #pool.map(parallelToCsvFromXmlApiStyle,files)
     
-    print(len(files))
-    print(len(os.listdir(CSVFILES)))
+    #print(len(files))
+    #print(len(os.listdir(CSVFILES)))
     
     #csvFiles = os.listdir(CSVFILES)
     #allFiles = tuple([[NEWPATH+"/"+re.sub(r"\.csv","",f),CSVFILES+"/"+f] for f in csvFiles])
     #print(allFiles[:10])
     
     #Units and References are added to the csv-files 
-    for file in files:
-        print(file[0],"\t",file[1])
-        postProcessing(file[0],file[1])
+    #for file in files:
+    #    print(file[0],"\t",file[1])
+    #    postProcessing(file[0],file[1])
     
     
