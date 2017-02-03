@@ -16,7 +16,7 @@ sys.path.insert(0, "/home/biml/Arelle") # inserts Arelle to the pythonpath, appe
 #sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
 
 USER = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/"
-ClusterUSER = "home/biml/bigdata/data_files/regnskaber/"
+ClusterUSER = "/home/biml/bigdata/data_files/regnskaber/"
 PATH = ClusterUSER+"testXML"
 NEWPATH = ClusterUSER+"cleanXML"
 TAXPATH = ClusterUSER+"tax"
@@ -147,8 +147,11 @@ def parallelToCsvFromXmlApiStyle(inoutFile):
             print(outfile+": is already created!")
 
     except:
+        print("Unexpected error:", sys.exc_info()[0])
+    
         print("infile: "+infile)
-        print("outfile: "+outfile)     
+        print("outfile: "+outfile)
+        raise     
         
           
 def postProcessing(docPath,csvPath,logFile="/tmp/log.txt"):
