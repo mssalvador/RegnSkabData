@@ -185,8 +185,8 @@ def convertFromXmlToCsv(parrentXMLFolder,parrentCSVFolder):
     return allFiles
     
 if __name__ == '__main__':
-    unZipCollection(ZIPFLES, PATH)
-    acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
+    #unZipCollection(ZIPFLES, PATH)
+    #acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
     files = tuple(convertFromXmlToCsv(NEWPATH,CSVFILES))
     
     print(len(files))
