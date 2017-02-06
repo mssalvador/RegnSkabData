@@ -17,6 +17,7 @@ sys.path.insert(0, "/home/biml/Arelle") # inserts Arelle to the pythonpath, appe
 
 USER = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/"
 ClusterUSER = "/home/biml/bigdata/data_files/regnskaber/"
+
 PATH = ClusterUSER+"testXML"
 NEWPATH = ClusterUSER+"cleanXML"
 TAXPATH = ClusterUSER+"tax"

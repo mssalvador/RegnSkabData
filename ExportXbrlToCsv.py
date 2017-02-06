@@ -34,7 +34,7 @@ class extractXbrlToCsv(Cntlr.Cntlr):
     # init sets up the default controller for logging to a file (instead of to terminal window)
     def __init__(self,infile,OutFile="/tmp/foo.csv", outputColumns=["Name","Dec","Prec","Lang","unitRef","contextRef","EntityIdentifier","Period","Value","Dimensions"]):
         # initialize superclass with default file logger
-        super().__init__(logFileName="/tmp/arellelog.txt", logFileMode="w")
+        super().__init__(logFileName="/tmp/arellelog.txt", logFileMode="a")
         self.outputFile = OutFile
         self.outputCols = outputColumns
         self.inputFile = infile
@@ -70,6 +70,7 @@ class extractXbrlToCsv(Cntlr.Cntlr):
         self.modelManager.close()
         modelXbrl.close()
         # close controller and application
+        super().close()
         self.close()
             
 # if python is initiated as a main_dep program, start the controller
