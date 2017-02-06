@@ -7,8 +7,8 @@ In order to extract accounts from XBRL-files to csv
 @author: svanhmic
 '''
 import sys
-#sys.path.insert(0, '/home/biml/Arelle')
-sys.path.insert(0,"/home/svanhmic/Programs/Arelle")
+sys.path.insert(0, '/home/biml/Arelle')
+#sys.path.insert(0,"/home/svanhmic/Programs/Arelle")
 from arelle import Cntlr
 from arelle import ViewFileFactList
 from arelle import ValidateUtr
