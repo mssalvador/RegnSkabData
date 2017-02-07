@@ -15,14 +15,14 @@ import GetContexts
 sys.path.insert(0, "/home/biml/Arelle") # inserts Arelle to the pythonpath, apperently
 #sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
 
-USER = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/"
-ClusterUSER = "/home/biml/bigdata/data_files/regnskaber/"
+#USER = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/"
+USER = "/home/biml/bigdata/data_files/regnskaber/"
 
-PATH = ClusterUSER+"testXML"
-NEWPATH = ClusterUSER+"cleanXML"
-TAXPATH = ClusterUSER+"tax"
-ZIPFLES = ClusterUSER+"testZipped"
-CSVFILES = ClusterUSER+"cleanCSV"
+PATH = USER+"testXML"
+NEWPATH = USER+"cleanXML"
+TAXPATH = USER+"tax"
+ZIPFLES = USER+"testZipped"
+CSVFILES = USER+"cleanCSV"
 TAXDICT = {}
 TAXDICT["20120101"] = "/dcca20120101"
 TAXDICT["20121001"] = "/XBRL20121001"
@@ -149,10 +149,10 @@ def parallelToCsvFromXmlApiStyle(inoutFile):
 
     except:
         print("Unexpected error:", sys.exc_info()[0])
-    
+        print("Unexpected error:", list(sys.exc_info()[2]))
         print("infile: "+infile)
         print("outfile: "+outfile)
-        raise     
+             
         
           
 def postProcessing(docPath,csvPath,logFile="/tmp/log.txt"):
