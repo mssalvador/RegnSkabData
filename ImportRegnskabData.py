@@ -18,28 +18,23 @@ account aplha [var x, val x , date x], beta[var x , val x , date x]
 
 '''
 
-from pyspark import SparkContext
-from pyspark.sql import SQLContext
-from pyspark.sql import Row
-from pyspark.sql.types import StringType,StructType, ArrayType,IntegerType,DateType
-import pyspark.sql.functions as F
-import os
-import re
-from datetime import datetime
-import numpy as np
-import matplotlib.pyplot as plt
-from RegnskabsClass import Regnskaber
-import sys
-#reload(sys)
-#sys.setdefaultencoding('utf-8')
 
+
+from pyspark import SparkContext
+from pyspark.sql import SQLContext, Row
+from pyspark.sql.types import StringType,StructType
+import pyspark.sql.functions as F
 
 sc = SparkContext("local[*]","importRegnskabs")
 sqlContext = SQLContext(sc)
 sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
-folderPath = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testcsv"
 finalXML = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/finalXML"
-sparkDataLoc = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/csv"
+
+
+import os
+from datetime import datetime
+from RegnskabsClass import Regnskaber
+import sys
 
 
 def convertToDate(col):
@@ -79,9 +74,17 @@ def extractFilesForTaxonomy(fileNamesDf,taxTypeDf):
 
 
 def main():
-    lengthUdf = F.udf(lambda x: len(x), IntegerType()) # user def methods 
-    convertToDateUdf = F.udf(convertToDate,DateType()) # user def methods
     
+    folderPath = sys.argv[1]
+    sparkDataLoc = sys.argv[2]
+    
+    if sys.argv[1] == "":
+        folderPath = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanCSV"
+      
+    if sys.argv[2] == "":
+        sparkDataLoc = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/parquet"
+        
+    print(sparkDataLoc)
     files = os.listdir(folderPath) # gets all the files in csv
     print(len(files))
     fileNamesDf = sqlContext.createDataFrame([Row(file=f) for f in files]) # import of csv files to dataframe   
@@ -113,10 +116,9 @@ def main():
                                    ,listCsvDf["col"]["startDate"].alias("startDate")
                                    ,listCsvDf["col"]["endDate"].alias("endDate"))
     
-    #valueCsvDf.show(truncate=False)
-    #orderedListCsvDf = listCsvDf.orderBy(listCsvDf["fieldlength"].desc()).select(listCsvDf["fieldlength"])
-    #newDf = df.select(df["field"]["name"].alias("name"),df["field"]["value"].alias("value"))
-    valueCsvDf.write.csv(sparkDataLoc+"/regnskabsdata.csv",mode='overwrite',header=True,sep=";")
+    
+    valueCsvDf.write.parquet(sparkDataLoc+"/test.parquet","overwrite")
+    #valueCsvDf.write.csv(sparkDataLoc+"/regnskabsdata.csv",mode='overwrite',header=True,sep=";")
 #regnskab = Regnskaber(files[0])
 if __name__ == '__main__':
     main()
