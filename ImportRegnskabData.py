@@ -22,16 +22,17 @@ account aplha [var x, val x , date x], beta[var x , val x , date x]
 
 from pyspark import SparkContext
 from pyspark.sql import SQLContext, Row
-from pyspark.sql.types import StringType,StructType
+from pyspark.sql.types import StringType,StructType,StructField,StructType,IntegerType,DateType,ArrayType
 import pyspark.sql.functions as F
 
 sc = SparkContext("local[*]","importRegnskabs")
 sqlContext = SQLContext(sc)
 sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
-finalXML = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/finalXML"
+
 
 
 import os
+import re
 from datetime import datetime
 from RegnskabsClass import Regnskaber
 import sys
@@ -72,54 +73,75 @@ def extractFilesForTaxonomy(fileNamesDf,taxTypeDf):
     filteredCsvDf = intersectFilesDf.filter(intersectFilesDf["taxonomy"] == mostTaxonomy)
     return [str(f["file"]) for f in filteredCsvDf.collect()]
 
+def toDataFrame(file):
+    '''
+        Creates a dataframe from a csv file
+    '''
+    
+    df = sqlContext.read.csv(path=file, sep=";", encoding="utf-8",ignoreTrailingWhiteSpace=True, nullValue="", nanValue="")
+    return df
+
+def getAllTaxFiles(path):
+    
+    return list(filter(lambda x: "taxlist.csv" in x,os.listdir(path)))
+
+def encodes(x):
+    try:
+        return x.encode('ascii', 'replace')
+    except:
+        return None 
 
 def main():
     
-    folderPath = sys.argv[1]
-    sparkDataLoc = sys.argv[2]
+    argLen = len(sys.argv)
+    csvLocation = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanCSV"
+    outputLocation = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/parquet"
+    if argLen == 2:
+        csvLocation = sys.argv[1]
+    elif argLen == 3:
+        csvLocation = sys.argv[1]
+        outputLocation = sys.argv[2]
+    elif argLen == 3:
+        csvLocation = sys.argv[1]
+        outputLocation = sys.argv[2]
+
+    taxFiles = getAllTaxFiles(csvLocation)
+    taxList = [csvLocation+"/"+i for i in taxFiles]
+
     
-    if sys.argv[1] == "":
-        folderPath = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanCSV"
+    xmlTaxSchema = StructType().add("path",StringType(), True).add("taxonomy", StringType(), True)
+    taxListDf = sqlContext.read.csv(path=taxList,schema=xmlTaxSchema, sep=";", encoding="utf-8")
+    
+    csvlist = [csvLocation+"/"+f for f in os.listdir(csvLocation) if f not in taxFiles] 
       
-    if sys.argv[2] == "":
-        sparkDataLoc = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/parquet"
-        
-    print(sparkDataLoc)
-    files = os.listdir(folderPath) # gets all the files in csv
-    print(len(files))
-    fileNamesDf = sqlContext.createDataFrame([Row(file=f) for f in files]) # import of csv files to dataframe   
-    
-    struct = StructType().add("file",StringType(),True).add("taxonomy",StringType(),True)
-    taxTypeDf = sqlContext.read.csv(finalXML+"/taxlist.csv",header=False,schema=struct,sep=";")
-    
-    #take out only the accounts with highest occurrence of taxonomy 
-    recordList = extractFilesForTaxonomy(fileNamesDf,taxTypeDf)
-    print("recordlist length: "+str(len(recordList)))
-    #list = []
-    #for f in recordList:
-    #    list.append(Regnskaber(folderPath+"/"+f))
-        
-    print("Done with all file")
-    
-    df = sqlContext.createDataFrame([Regnskaber(folderPath+"/"+f) for f in recordList])
-    #del(list)
-    df.printSchema()
-    df.show()
-    print(df.count())
-    #print(df.take(1))
-    listCsvDf = df.drop("file").select(F.explode(F.col("field")))
-    valueCsvDf = listCsvDf.select(F.regexp_replace(listCsvDf["col"]["name"],r"\w+:","").alias("name")
-                                   ,listCsvDf["col"]["id"].cast("integer").alias("id")
-                                   ,listCsvDf["col"]["value"].alias("value")
-                                   ,listCsvDf["col"]["unit"].alias("unit")
-                                   ,listCsvDf["col"]["contextRef"].alias("contextRef")
-                                   ,listCsvDf["col"]["startDate"].alias("startDate")
-                                   ,listCsvDf["col"]["endDate"].alias("endDate"))
+    regnskabRowSchema = (StructType()
+                         .add(field="Name", data_type=StringType(), nullable=True)
+                         .add(field="Dec", data_type=StringType(), nullable=True)
+                         .add(field="Prec", data_type=StringType(), nullable=True)
+                         .add(field="Lang", data_type=StringType(), nullable=True)
+                         .add(field="unitRef", data_type=StringType(), nullable=True)
+                         .add(field="contextRef", data_type=StringType(), nullable=True)
+                         .add(field="EntityIdentifier", data_type=StringType(), nullable=True)
+                         .add(field="Start", data_type=StringType(), nullable=True)
+                         .add(field="End_Instant", data_type=StringType(), nullable=True)
+                         .add(field="Value", data_type=StringType(), nullable=True)
+                         .add(field="Dimensions", data_type=StringType(), nullable=True))
     
     
-    valueCsvDf.write.parquet(sparkDataLoc+"/test.parquet","overwrite")
-    #valueCsvDf.write.csv(sparkDataLoc+"/regnskabsdata.csv",mode='overwrite',header=True,sep=";")
-#regnskab = Regnskaber(files[0])
+    df = (sqlContext
+          .read
+          .csv(csvlist,sep=",",encoding='utf8',schema=regnskabRowSchema,header=True,nullValue=None,nanValue=None))
+
+    cols = df.columns
+    uniCodeUdf = F.udf(lambda x: encodes(x), StringType())
+    stringCols = [uniCodeUdf(F.col(i[0])).alias(i[0]) if i[1] == "string" else i[0] for i in df.dtypes]   
+    
+    alteredDf = df.select(stringCols)
+    alteredDf.show(20)
+    
+    #write the dataframe to parquet file
+    alteredDf.write.parquet(outputLocation+"/regnskaber.parquet",mode="overwrite")
+    
 if __name__ == '__main__':
     main()
 
