@@ -110,7 +110,11 @@ def main():
 
     
     xmlTaxSchema = StructType().add("path",StringType(), True).add("taxonomy", StringType(), True)
-    taxListDf = sqlContext.read.format('com.databricks.spark.csv').options(schema=xmlTaxSchema, sep=";", encoding="utf-8").load(path=taxList)
+    taxListDf = (sqlContext
+                 .read
+                 .format('com.databricks.spark.csv')
+                 .options(sep=";", encoding="utf-8")
+                 .load(path=taxList,schema=xmlTaxSchema))
     
     csvlist = [csvLocation+"/"+f for f in os.listdir(csvLocation) if f not in taxFiles] 
       
@@ -142,7 +146,9 @@ def main():
     alteredDf.show(20)
     
     #write the dataframe to parquet file
-    alteredDf.write.parquet(outputLocation+"/regnskaber.parquet",mode="overwrite")
+    (alteredDf
+     .write
+     .parquet(outputLocation+"/regnskaber.parquet",mode="overwrite"))
     
 if __name__ == '__main__':
     main()
