@@ -135,8 +135,8 @@ def main():
     df = (sqlContext
           .read
           .format('com.databricks.spark.csv')
-          .options(sep=",",encoding='utf8',schema=regnskabRowSchema,header=True,nullValue=None,nanValue=None)
-          .load(csvlist))
+          .options(sep=",",encoding='utf8',header=True,nullValue=None,nanValue=None)
+          .load(csvlist,schema=regnskabRowSchema))
 
     cols = df.columns
     uniCodeUdf = F.udf(lambda x: encodes(x), StringType())
