@@ -27,7 +27,7 @@ import pyspark.sql.functions as F
 
 sc = SparkContext("local[*]","importRegnskabs")
 sqlContext = SQLContext(sc)
-sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
+#sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
 
 
 
