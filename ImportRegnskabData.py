@@ -114,7 +114,7 @@ def main():
                  .read
                  .format('com.databricks.spark.csv')
                  .options(sep=";", encoding="utf-8")
-                 .load(path=taxList,schema=xmlTaxSchema))
+                 .load(taxList,schema=xmlTaxSchema))
     
     csvlist = [csvLocation+"/"+f for f in os.listdir(csvLocation) if f not in taxFiles] 
       
