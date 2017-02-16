@@ -96,17 +96,20 @@ def main():
     argLen = len(sys.argv)
     csvLocation = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanCSV"
     outputLocation = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/parquet"
+    taxLocation = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanTaxLists"
+    
     if argLen == 2:
         csvLocation = sys.argv[1]
     elif argLen == 3:
         csvLocation = sys.argv[1]
         outputLocation = sys.argv[2]
-    elif argLen == 3:
+    elif argLen == 4:
         csvLocation = sys.argv[1]
         outputLocation = sys.argv[2]
+        taxLocation = sys.argv[3]
 
-    taxFiles = getAllTaxFiles(csvLocation)
-    taxList = [csvLocation+"/"+i for i in taxFiles]
+    #taxFiles = getAllTaxFiles(csvLocation)
+    #taxList = [csvLocation+"/"+i for i in taxFiles]
 
     
     xmlTaxSchema = StructType().add("path",StringType(), True).add("taxonomy", StringType(), True)
@@ -114,9 +117,9 @@ def main():
                  .read
                  .format('com.databricks.spark.csv')
                  .options(sep=";", encoding="utf-8")
-                 .load(taxList,schema=xmlTaxSchema))
+                 .load(taxLocation+"/*.csv",schema=xmlTaxSchema))
     
-    csvlist = [csvLocation+"/"+f for f in os.listdir(csvLocation) if f not in taxFiles] 
+    #csvlist = [csvLocation+"/"+f for f in os.listdir(csvLocation) if f not in taxFiles] 
       
     regnskabRowSchema = (StructType()
                          .add(field="Name", data_type=StringType(), nullable=True)
@@ -136,7 +139,7 @@ def main():
           .read
           .format('com.databricks.spark.csv')
           .options(sep=",",encoding='utf8',header=True,nullValue=None,nanValue=None)
-          .load(csvlist,schema=regnskabRowSchema))
+          .load(csvLocation+"/*.csv",schema=regnskabRowSchema))
 
     cols = df.columns
     uniCodeUdf = F.udf(lambda x: encodes(x), StringType())
