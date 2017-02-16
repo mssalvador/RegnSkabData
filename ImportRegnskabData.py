@@ -110,7 +110,7 @@ def main():
 
     
     xmlTaxSchema = StructType().add("path",StringType(), True).add("taxonomy", StringType(), True)
-    taxListDf = sqlContext.read.csv(path=taxList,schema=xmlTaxSchema, sep=";", encoding="utf-8")
+    taxListDf = sqlContext.read.format('com.databricks.spark.csv').options(schema=xmlTaxSchema, sep=";", encoding="utf-8").load(path=taxList)
     
     csvlist = [csvLocation+"/"+f for f in os.listdir(csvLocation) if f not in taxFiles] 
       
@@ -130,7 +130,9 @@ def main():
     
     df = (sqlContext
           .read
-          .csv(csvlist,sep=",",encoding='utf8',schema=regnskabRowSchema,header=True,nullValue=None,nanValue=None))
+          .format('com.databricks.spark.csv')
+          .options(sep=",",encoding='utf8',schema=regnskabRowSchema,header=True,nullValue=None,nanValue=None)
+          .load(csvlist))
 
     cols = df.columns
     uniCodeUdf = F.udf(lambda x: encodes(x), StringType())
