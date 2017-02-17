@@ -12,11 +12,15 @@ import sys
 from shutil import copyfile
 import  ExportXbrlToCsv as exp
 import GetContexts
-sys.path.insert(0, "/home/biml/Arelle") # inserts Arelle to the pythonpath, apperently
-#sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
+import getpass
 
-#USER = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/"
-USER = "/home/biml/bigdata/data_files/regnskaber/"
+if getpass.getuser() == "biml":
+    sys.path.insert(0, "/home/biml/Arelle") # inserts Arelle to the pythonpath, apperently
+    USER = "/home/biml/bigdata/data_files/regnskaber/"
+elif getpass.getuser() == "svanhmic":
+    sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
+    USER = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/"
+
 
 PATH = USER+"testXML"
 NEWPATH = USER+"cleanXML"
@@ -170,6 +174,7 @@ def postProcessing(docPath,csvPath,logFile="/tmp/log.txt"):
         try: 
             log.write(GetContexts.replaceUnitsAndContexts(docPath,csvPath)+"\n")
         except KeyError:
+            #print(docPath)
             print(csvPath+" the file is already processed\n")
             
 def convertFromXmlToCsv(parrentXMLFolder,parrentCSVFolder):
@@ -178,8 +183,7 @@ def convertFromXmlToCsv(parrentXMLFolder,parrentCSVFolder):
     '''
     subFiles = os.listdir(parrentXMLFolder)
     allFiles = []
-    for subF in subFiles:
-        #print(subF)
+    for subF in reversed(subFiles): #is reversed such taht if a newer account has been made, then it will be taken first.
         allFiles += [[parrentXMLFolder+"/"+subF+"/"+f,parrentCSVFolder+"/"+f+".csv"] for f in os.listdir(parrentXMLFolder+"/"+subF)]
     #for f in fileTuple:
     #    print(f)
@@ -189,11 +193,11 @@ if __name__ == '__main__':
     #unZipCollection(ZIPFLES, PATH)
     #acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
     files = tuple(convertFromXmlToCsv(NEWPATH,CSVFILES))
-    
+    #print(files[:10])
     print(len(files))
     #The conversion takes place here
-   # pool = multiprocessing.Pool(processes=4)
-   # pool.map(parallelToCsvFromXmlApiStyle,files)
+    pool = multiprocessing.Pool(processes=7)
+    pool.map(parallelToCsvFromXmlApiStyle,files)
     
     print(len(files))
     #print(len(os.listdir(CSVFILES)))

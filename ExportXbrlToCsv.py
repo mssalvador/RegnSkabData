@@ -6,9 +6,15 @@ In order to extract accounts from XBRL-files to csv
 
 @author: svanhmic
 '''
-import sys
-sys.path.insert(0, '/home/biml/Arelle')
-#sys.path.insert(0,"/home/svanhmic/Programs/Arelle")
+import sys  
+import getpass
+
+if getpass.getuser() == "biml":
+    sys.path.insert(0, '/home/biml/Arelle')
+elif getpass.getuser() == "svanhmic":
+    sys.path.insert(0,"/home/svanhmic/Programs/Arelle")
+    
+
 from arelle import Cntlr, FileSource, ViewFileFactList, ValidateUtr, ModelManager
 from io import StringIO
 from contextlib import redirect_stdout

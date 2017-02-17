@@ -18,49 +18,6 @@ from xml.dom import expatbuilder
 CSVFILES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testcsv"
 NEWPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testXML"
        
-# def getSecondContexts(path):
-#     """ 
-#     First atempt to make a parser for unit and context references. 
-#     
-#     Input
-#         path: The path to the diretory where the files are stored. 
-#     
-#     Output
-#         dokArr: A dictionary with contextsrefs as index and values as the translation
-#     """
-#     files = os.listdir(path)
-#     contextRe = re.compile(r"<\w*:*context id.*>.*</.*context>",flags=re.MULTILINE)
-#     contextStart = re.compile(r"<(\w+:|\w*)context id.*>",flags=re.MULTILINE)
-#     contextEnd = re.compile(r"</[\w\W]*context>")
-# 
-#     dokArr = {}
-#     for file in files:
-#         doesPrint = False
-#         dokString = "<xbrl>"
-#         with open(path+"/"+file) as f:
-#             for line in f:
-#                 start = contextStart.search(line)
-#                 end = contextEnd.search(line)
-#                 conRe = contextRe.findall(line)
-#                 if start and not end:
-#                     doesPrint = True
-#                     #print("start: "+str(start.group()))
-#                 elif conRe:
-#                     dokString += conRe[0]
-#                     #print("conre: "+dokString)
-#                     continue
-#                 if doesPrint:
-#                     if start:
-#                         #print("start: "+str(start.group()))
-#                         dokString += start.group()
-#                     else:
-#                         dokString += line
-#                 if not start and end:
-#                     doesPrint = False
-#                     #print("end: "+str(end.group()))
-#         dokArr[file] = re.sub("[\n\s\t]+"," ", dokString+"</xbrl>",flags=re.MULTILINE )
-#     #print(dokString)
-#     return dokArr
 
 def getContextRef(docPath):
     """ 
@@ -137,7 +94,7 @@ def replaceUnitsAndContexts(docPath,csvPath):
         newRows = []
         fieldNames = [] 
         with open(csvPath) as csvfile:
-            file = csv.DictReader(csvfile)
+            file = csv.DictReader(csvfile,delimiter="|")
             #fieldNames = [fieldName.decode("ascii").encode("utf-8") for fieldName in file.fieldnames]
             fieldNames = file.fieldnames
             #print(fieldNames)
@@ -159,11 +116,12 @@ def replaceUnitsAndContexts(docPath,csvPath):
                     del row[None]
                 newRows.append(row)
         with open(csvPath,"w+") as outputcsv:
-            outputFile = csv.DictWriter(outputcsv,fieldnames=fieldNames)
+            outputFile = csv.DictWriter(outputcsv,fieldnames=fieldNames,delimiter="|",quoting=csv.QUOTE_ALL,dialect='excel')
             outputFile.writeheader()
             outputFile.writerows(newRows)
         return str(csvPath)+": OK"
-    except TypeError:
+    except TypeError as te:
+        print(str(te))
         #print(row["contextRef"])
         print("contexts: ",contextDict)
         print("units: ",unitDict)

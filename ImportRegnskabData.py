@@ -116,7 +116,7 @@ def main():
     taxListDf = (sqlContext
                  .read
                  .format('com.databricks.spark.csv')
-                 .options(sep=";", encoding="utf-8")
+                 .options(delimiter=";", encoding="utf-8")
                  .load(taxLocation+"/*.csv",schema=xmlTaxSchema))
     
     #csvlist = [csvLocation+"/"+f for f in os.listdir(csvLocation) if f not in taxFiles] 
@@ -138,7 +138,7 @@ def main():
     df = (sqlContext
           .read
           .format('com.databricks.spark.csv')
-          .options(sep=",",encoding='utf8',header=True,nullValue=None,nanValue=None)
+          .options(sep="|",encoding='utf8',header=True,nullValue=None,nanValue=None,dialect='excel')
           .load(csvLocation+"/*.csv",schema=regnskabRowSchema))
 
     cols = df.columns
