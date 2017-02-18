@@ -196,7 +196,7 @@ if __name__ == '__main__':
     #print(files[:10])
     print(len(files))
     #The conversion takes place here
-    pool = multiprocessing.Pool(processes=7)
+    pool = multiprocessing.Pool(processes=5)
     pool.map(parallelToCsvFromXmlApiStyle,files)
     
     print(len(files))
