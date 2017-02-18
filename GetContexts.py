@@ -94,7 +94,7 @@ def replaceUnitsAndContexts(docPath,csvPath):
         newRows = []
         fieldNames = [] 
         with open(csvPath) as csvfile:
-            file = csv.DictReader(csvfile,delimiter="|")
+            file = csv.DictReader(csvfile,delimiter="|",dialect='excel')
             #fieldNames = [fieldName.decode("ascii").encode("utf-8") for fieldName in file.fieldnames]
             fieldNames = file.fieldnames
             #print(fieldNames)
