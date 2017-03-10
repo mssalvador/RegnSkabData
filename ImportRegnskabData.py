@@ -24,12 +24,15 @@ from pyspark import SparkContext
 from pyspark.sql import SQLContext, Row
 from pyspark.sql.types import StringType,StructType,StructField,StructType,IntegerType,DateType,ArrayType
 import pyspark.sql.functions as F
+import getpass
 
 sc = SparkContext.getOrCreate()
 #sc = SparkContext("local[*]","importRegnskabs")
 sqlContext = SQLContext(sc)
-sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
-
+if getpass.getuser() == "svanhmic":
+    sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
+elif getpass.getuser() == "biml":
+    sc.addPyFile("/home/biml/bigdata/python_files/regnskab/RegnskabsClass.py")
 
 
 import os
@@ -38,7 +41,7 @@ from datetime import datetime
 from RegnskabsClass import Regnskaber
 import sys
 import csv
-import getpass
+
 
 def convertToDate(col):
     try:
