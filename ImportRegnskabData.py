@@ -25,8 +25,8 @@ from pyspark.sql import SQLContext, Row
 from pyspark.sql.types import StringType,StructType,StructField,StructType,IntegerType,DateType,ArrayType
 import pyspark.sql.functions as F
 
-
-sc = SparkContext("local[*]","importRegnskabs")
+sc = SparkContext.getOrCreate()
+#sc = SparkContext("local[*]","importRegnskabs")
 sqlContext = SQLContext(sc)
 sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
 
@@ -38,6 +38,7 @@ from datetime import datetime
 from RegnskabsClass import Regnskaber
 import sys
 import csv
+import getpass
 
 def convertToDate(col):
     try:
@@ -49,6 +50,7 @@ def removeNewlineChars(file):
     
     fieldNames = []
     newRows = []
+    csv.field_size_limit(sys.maxsize)
     with open(file,"r",) as csvfile:
         file = csv.reader(csvfile,delimiter="|",dialect='excel')
         #print(type(file))
@@ -177,9 +179,12 @@ def replaceAll(text,dic):
 def main():
     
     argLen = len(sys.argv)
-    csvLocation = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanCSV"
-    outputLocation = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/sparkdata/parquet"
-    taxLocation = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/cleanTaxLists"
+
+    userData = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata"
+    csvLocation = userData+"/cleanOdinCSV"
+    outputLocation = userData+"/sparkdata/parquet"
+    taxLocation = userData+"/cleanTaxLists"
+
     
     if argLen == 2:
         csvLocation = sys.argv[1]
@@ -241,7 +246,7 @@ def main():
                  .withColumn(col=exUdf(F.col("Value")),colName="Value")
                  .withColumn(col=lenUdf(F.col("Value")),colName="originalLength")
                 )
-    alteredDf.show(50)
+    #alteredDf.show(50)
     alteredDf.printSchema()
     
     #write the dataframe to parquet file

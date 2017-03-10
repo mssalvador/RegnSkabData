@@ -66,7 +66,7 @@ def PivotForAllCols(sqlContext,df):
     
 def main(args):
     #Read data 
-    sc = SparkContext(master="local[8]",appName="CreateRegnskabsData")#pyFiles=['/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py'])
+    sc = SparkContext(master="local[*]",appName="CreateRegnskabsData")#pyFiles=['/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py'])
     spark = SparkSession(sc)
     sqlContext = SQLContext(sc,sparkSession=spark)
     df = sqlContext.read.csv(cleanedCsvPath+"/regnskabsdata.csv", sep=";", header=True,encoding="utf-8") 
