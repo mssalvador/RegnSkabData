@@ -25,9 +25,10 @@ from pyspark.sql import SQLContext, Row
 from pyspark.sql.types import StringType,StructType,StructField,StructType,IntegerType,DateType,ArrayType
 import pyspark.sql.functions as F
 
+
 sc = SparkContext("local[*]","importRegnskabs")
 sqlContext = SQLContext(sc)
-#sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
+sc.addPyFile('/home/svanhmic/workspace/Python/Erhvervs/src/RegnSkabData/RegnskabsClass.py') # this adds the class regnskabsClass to the spark execution
 
 
 
@@ -36,7 +37,7 @@ import re
 from datetime import datetime
 from RegnskabsClass import Regnskaber
 import sys
-
+import csv
 
 def convertToDate(col):
     try:
@@ -44,6 +45,24 @@ def convertToDate(col):
     except:
         return None
 
+def removeNewlineChars(file):
+    
+    fieldNames = []
+    newRows = []
+    with open(file,"r",) as csvfile:
+        file = csv.reader(csvfile,delimiter="|",dialect='excel')
+        #print(type(file))
+        for r in file:
+            #print(r)
+            newR = [(i.replace("\n",""))for i in r]
+            #print(newR)
+            newRows.append(newR)
+    return newRows
+    
+def writeToFile(ars,file):
+    with open(file,"w+") as outputcsv:
+        outputFile = csv.writer(outputcsv,delimiter="|",quoting=csv.QUOTE_ALL,dialect='excel',quotechar='"')
+        outputFile.writerows(ars)
 
 def extractFilesForTaxonomy(fileNamesDf,taxTypeDf):
     '''
@@ -87,9 +106,73 @@ def getAllTaxFiles(path):
 
 def encodes(x):
     try:
-        return x.encode('ascii', 'replace')
+        return x.encode("ascii","xmlcharrefreplace")
+    #.encode("ascii", "replace")
     except:
-        return None 
+        return None
+
+    
+def stringToArray(col):
+    '''
+        changes the string column to an array column
+    '''
+    removeSigns = re.compile(r'[^\w\.,:]',flags=re.IGNORECASE)
+    try: 
+        words = removeSigns.sub('',col).split(",")
+    except:
+        words = []
+    return words
+
+
+
+def moveFiles(source,dest):
+    
+    files = os.listdir(source)
+    try:
+        [os.rename(src=source+"/"+i,dst=dest+"/"+i) for i in files if "taxlist" in i]
+        return "done"
+    except:
+        return None
+
+def lend(x):
+    try:
+        return len(x)
+    except:
+        return 0
+
+lenUdf = F.udf(lambda x: lend(x),IntegerType())
+
+def showColums(df,funcs,*args):
+    
+    aggedCols = [f(i) for i in args for f in funcs]
+    TypeSelectDf = (df.groupBy(*args)
+                    .agg(*aggedCols)
+                   )
+                    
+    TypeSelectDf.show(len(TypeSelectDf.collect()))
+    
+def extr(x):
+    extracted = re.sub(pattern=r'<.*?>|\t',repl="",string=str(x),flags=re.MULTILINE|re.IGNORECASE|re.VERBOSE)
+    try:
+        return extracted
+    except AttributeError as ae:
+        print("wrong!!!")
+        return None
+
+
+def convertToSym(x):
+    matched = dict(zip(re.findall(string=x,pattern=r'(&#\d+;)'),[chr(int(i)) for i in re.findall(string=x,pattern=r'(?<=&#)\d+')]))
+    #print(matched)
+    #print(replaceAll(x,matched))
+    return replaceAll(x,matched)
+    
+    
+def replaceAll(text,dic):
+    for i in dic.items():
+        text = text.replace(i[0], i[1])
+    return text
+
+   
 
 def main():
     
@@ -107,20 +190,17 @@ def main():
         csvLocation = sys.argv[1]
         outputLocation = sys.argv[2]
         taxLocation = sys.argv[3]
-
-    #taxFiles = getAllTaxFiles(csvLocation)
-    #taxList = [csvLocation+"/"+i for i in taxFiles]
-
     
-    xmlTaxSchema = StructType().add("path",StringType(), True).add("taxonomy", StringType(), True)
-    taxListDf = (sqlContext
-                 .read
-                 .format('com.databricks.spark.csv')
-                 .options(delimiter=";", encoding="utf-8")
-                 .load(taxLocation+"/*.csv",schema=xmlTaxSchema))
+    allFiles = os.listdir(csvLocation)
     
-    #csvlist = [csvLocation+"/"+f for f in os.listdir(csvLocation) if f not in taxFiles] 
-      
+    #initial preprocessing
+    for f in allFiles:
+        writeToFile(removeNewlineChars(csvLocation+"/"+f),csvLocation+"/"+f)
+        
+    #move taxlists to anotherfolder
+    moveFiles(csvLocation,taxLocation)
+    
+    
     regnskabRowSchema = (StructType()
                          .add(field="Name", data_type=StringType(), nullable=True)
                          .add(field="Dec", data_type=StringType(), nullable=True)
@@ -138,15 +218,31 @@ def main():
     df = (sqlContext
           .read
           .format('com.databricks.spark.csv')
-          .options(sep="|",encoding='utf8',header=True,nullValue=None,nanValue=None,dialect='excel')
+          .options(sep="|",encoding='utf8',header=True,nullValue="\n",dialect='excel',qoutes='"',lineterminator='^M',parserLib="UNIVOCITY")
           .load(csvLocation+"/*.csv",schema=regnskabRowSchema))
-
-    cols = df.columns
+    
+    #print(df.filter((F.col("Name")=="arr:StatementOfAuditorsResponsibilityForAuditAndAuditPerformed")&(F.col("EntityIdentifier")=="29241422")).collect())
+    #cols = df.columns
     uniCodeUdf = F.udf(lambda x: encodes(x), StringType())
+    exUdf = F.udf(lambda x: extr(x),StringType())
+    lenUdf = F.udf(lambda x: lend(x),IntegerType())
+    stringToArrayUdf = F.udf(lambda x: stringToArray(x),ArrayType(StringType(),True))
+    
+    
     stringCols = [uniCodeUdf(F.col(i[0])).alias(i[0]) if i[1] == "string" else i[0] for i in df.dtypes]   
     
-    alteredDf = df.select(stringCols)
-    alteredDf.show(20)
+    alteredDf = (df
+                 .select(stringCols)
+                 .withColumn(col=F.regexp_replace(F.col("EntityIdentifier")," ","").cast("integer"),colName="EntityIdentifier")
+                 .withColumn(col=stringToArrayUdf(F.col("Dimensions")),colName="Dimensions")
+                 .withColumn(col=F.col("Start").cast("date"),colName="Start")
+                 .withColumn(col=F.col("End_Instant").cast("date"),colName="End_Instant")
+                 .withColumn(col=F.regexp_replace(F.col("unitRef"),r'\w+:',""),colName="unitRef")
+                 .withColumn(col=exUdf(F.col("Value")),colName="Value")
+                 .withColumn(col=lenUdf(F.col("Value")),colName="originalLength")
+                )
+    alteredDf.show(50)
+    alteredDf.printSchema()
     
     #write the dataframe to parquet file
     (alteredDf
