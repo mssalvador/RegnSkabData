@@ -205,15 +205,14 @@ def main():
         outputLocation = sys.argv[2]
         taxLocation = sys.argv[3]
     
-    allFiles = os.listdir(csvLocation)
+    #allFiles = os.listdir(csvLocation)
     
-    print(allFiles)
+    #print(allFiles)
     #initial preprocessing
-    for f in allFiles:
-        writeToFile(removeNewlineChars(csvLocation+"/"+f),csvLocation+"/"+f)
+    writeToFile(removeNewlineChars(csvLocation),csvLocation)
         
     #move taxlists to anotherfolder
-    moveFiles(csvLocation,taxLocation)
+    #moveFiles(csvLocation,taxLocation)
     
     
     regnskabRowSchema = (StructType()
