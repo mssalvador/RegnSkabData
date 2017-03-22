@@ -207,64 +207,63 @@ def main():
     
     allFiles = os.listdir(csvLocation)
     
-    print(allFiles)
     #initial preprocessing
     for f in allFiles:
         writeToFile(removeNewlineChars(csvLocation+"/"+f),csvLocation+"/"+f)
         
     #move taxlists to anotherfolder
-    moveFiles(csvLocation,taxLocation)
+    #moveFiles(csvLocation,taxLocation)
     
     
-    regnskabRowSchema = (StructType()
-                         .add(field="Name", data_type=StringType(), nullable=True)
-                         .add(field="Dec", data_type=StringType(), nullable=True)
-                         .add(field="Prec", data_type=StringType(), nullable=True)
-                         .add(field="Lang", data_type=StringType(), nullable=True)
-                         .add(field="unitRef", data_type=StringType(), nullable=True)
-                         .add(field="contextRef", data_type=StringType(), nullable=True)
-                         .add(field="EntityIdentifier", data_type=StringType(), nullable=True)
-                         .add(field="Start", data_type=StringType(), nullable=True)
-                         .add(field="End_Instant", data_type=StringType(), nullable=True)
-                         .add(field="Value", data_type=StringType(), nullable=True)
-                         .add(field="Dimensions", data_type=StringType(), nullable=True))
-    
-    #sc.textFile(csvLocation).map(lambda x: len(x))
-    
-    
-    df = (sqlContext
-            .read
-            .format("csv")
-            .options(sep="|",encoding='utf8',header=True,nullValue="\n",dialect='excel',qoutes='"',lineterminator='^M',maxCharsPerColumn=2000000)
-            .load(csvLocation,schema=regnskabRowSchema))
-         
-    #print(df.filter((F.col("Name")=="arr:StatementOfAuditorsResponsibilityForAuditAndAuditPerformed")&(F.col("EntityIdentifier")=="29241422")).collect())
-    #cols = df.columns
-    uniCodeUdf = F.udf(lambda x: encodes(x), StringType())
-    exUdf = F.udf(lambda x: extr(x),StringType())
-    lenUdf = F.udf(lambda x: lend(x),IntegerType())
-    stringToArrayUdf = F.udf(lambda x: stringToArray(x),ArrayType(StringType(),True))
-     
-     
-    stringCols = [uniCodeUdf(F.col(i[0])).alias(i[0]) if i[1] == "string" else i[0] for i in df.dtypes]   
-     
-    alteredDf = (df
-                 .select(stringCols)
-                 .withColumn(col=F.regexp_replace(F.col("EntityIdentifier")," ","").cast("integer"),colName="EntityIdentifier")
-                 .withColumn(col=stringToArrayUdf(F.col("Dimensions")),colName="Dimensions")
-                 .withColumn(col=F.col("Start").cast("date"),colName="Start")
-                 .withColumn(col=F.col("End_Instant").cast("date"),colName="End_Instant")
-                 .withColumn(col=F.regexp_replace(F.col("unitRef"),r'\w+:',""),colName="unitRef")
-                 .withColumn(col=exUdf(F.col("Value")),colName="Value")
-                 .withColumn(col=lenUdf(F.col("Value")),colName="originalLength")
-                )
-    alteredDf.show(50)
-    alteredDf.printSchema()
-     
-    #write the dataframe to parquet file
-    (alteredDf
-     .write
-     .parquet(outputLocation,mode="overwrite"))
+#     regnskabRowSchema = (StructType()
+#                          .add(field="Name", data_type=StringType(), nullable=True)
+#                          .add(field="Dec", data_type=StringType(), nullable=True)
+#                          .add(field="Prec", data_type=StringType(), nullable=True)
+#                          .add(field="Lang", data_type=StringType(), nullable=True)
+#                          .add(field="unitRef", data_type=StringType(), nullable=True)
+#                          .add(field="contextRef", data_type=StringType(), nullable=True)
+#                          .add(field="EntityIdentifier", data_type=StringType(), nullable=True)
+#                          .add(field="Start", data_type=StringType(), nullable=True)
+#                          .add(field="End_Instant", data_type=StringType(), nullable=True)
+#                          .add(field="Value", data_type=StringType(), nullable=True)
+#                          .add(field="Dimensions", data_type=StringType(), nullable=True))
+#     
+#     #sc.textFile(csvLocation).map(lambda x: len(x))
+#     
+#     
+#     df = (sqlContext
+#             .read
+#             .format("csv")
+#             .options(sep="|",encoding='utf8',header=True,nullValue="\n",dialect='excel',qoutes='"',lineterminator='^M',maxCharsPerColumn=2000000)
+#             .load(csvLocation,schema=regnskabRowSchema))
+#          
+#     #print(df.filter((F.col("Name")=="arr:StatementOfAuditorsResponsibilityForAuditAndAuditPerformed")&(F.col("EntityIdentifier")=="29241422")).collect())
+#     #cols = df.columns
+#     uniCodeUdf = F.udf(lambda x: encodes(x), StringType())
+#     exUdf = F.udf(lambda x: extr(x),StringType())
+#     lenUdf = F.udf(lambda x: lend(x),IntegerType())
+#     stringToArrayUdf = F.udf(lambda x: stringToArray(x),ArrayType(StringType(),True))
+#      
+#      
+#     stringCols = [uniCodeUdf(F.col(i[0])).alias(i[0]) if i[1] == "string" else i[0] for i in df.dtypes]   
+#      
+#     alteredDf = (df
+#                  .select(stringCols)
+#                  .withColumn(col=F.regexp_replace(F.col("EntityIdentifier")," ","").cast("integer"),colName="EntityIdentifier")
+#                  .withColumn(col=stringToArrayUdf(F.col("Dimensions")),colName="Dimensions")
+#                  .withColumn(col=F.col("Start").cast("date"),colName="Start")
+#                  .withColumn(col=F.col("End_Instant").cast("date"),colName="End_Instant")
+#                  .withColumn(col=F.regexp_replace(F.col("unitRef"),r'\w+:',""),colName="unitRef")
+#                  .withColumn(col=exUdf(F.col("Value")),colName="Value")
+#                  .withColumn(col=lenUdf(F.col("Value")),colName="originalLength")
+#                 )
+#     alteredDf.show(50)
+#     alteredDf.printSchema()
+#      
+#     #write the dataframe to parquet file
+#     (alteredDf
+#      .write
+#      .parquet(outputLocation,mode="overwrite"))
     
 if __name__ == '__main__':
     main()
