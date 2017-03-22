@@ -207,6 +207,7 @@ def main():
     
     allFiles = os.listdir(csvLocation)
     
+    print(allFiles)
     #initial preprocessing
     for f in allFiles:
         writeToFile(removeNewlineChars(csvLocation+"/"+f),csvLocation+"/"+f)
