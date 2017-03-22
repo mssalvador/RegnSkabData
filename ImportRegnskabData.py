@@ -52,16 +52,22 @@ def convertToDate(col):
 def removeNewlineChars(file):
     
     fieldNames = []
-    newRows = []
+    
     csv.field_size_limit(sys.maxsize)
     with open(file,"r",) as csvfile:
-        file = csv.reader(csvfile,delimiter="|",dialect='excel')
+        newRows = []
+        file = csv.reader(csvfile,delimiter="|",dialect='excel',lineterminator='^M')
         #print(type(file))
         for r in file:
             #print(r)
             newR = [(i.replace("\n",""))for i in r]
+            lenNewR = [len(i) for i in newR if len(i) >= 100000]
+            if len(lenNewR) != 0:
+                print(lenNewR)
             #print(newR)
             newRows.append(newR)
+    if len(newRows) > 1000000:
+        print(len(newRows))
     return newRows
     
 def writeToFile(ars,file):
@@ -184,8 +190,8 @@ def main():
     argLen = len(sys.argv)
 
     userData = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata"
-    csvLocation = userData+"/cleanOdinCSV"
-    outputLocation = userData+"/sparkdata/parquet"
+    csvLocation = userData+"/cleanCSV/part1"
+    outputLocation = userData+"/sparkdata/parquet/regnskaber.parquet"
     taxLocation = userData+"/cleanTaxLists"
 
     
@@ -222,23 +228,25 @@ def main():
                          .add(field="Value", data_type=StringType(), nullable=True)
                          .add(field="Dimensions", data_type=StringType(), nullable=True))
     
+    #sc.textFile(csvLocation).map(lambda x: len(x))
+    
     
     df = (sqlContext
-          .read
-          .format('com.databricks.spark.csv')
-          .options(sep="|",encoding='utf8',header=True,nullValue="\n",dialect='excel',qoutes='"',lineterminator='^M',parserLib="UNIVOCITY")
-          .load(csvLocation+"/*.csv",schema=regnskabRowSchema))
-    
+            .read
+            .format("csv")
+            .options(sep="|",encoding='utf8',header=True,nullValue="\n",dialect='excel',qoutes='"',lineterminator='^M',maxCharsPerColumn=2000000)
+            .load(csvLocation,schema=regnskabRowSchema))
+         
     #print(df.filter((F.col("Name")=="arr:StatementOfAuditorsResponsibilityForAuditAndAuditPerformed")&(F.col("EntityIdentifier")=="29241422")).collect())
     #cols = df.columns
     uniCodeUdf = F.udf(lambda x: encodes(x), StringType())
     exUdf = F.udf(lambda x: extr(x),StringType())
     lenUdf = F.udf(lambda x: lend(x),IntegerType())
     stringToArrayUdf = F.udf(lambda x: stringToArray(x),ArrayType(StringType(),True))
-    
-    
+     
+     
     stringCols = [uniCodeUdf(F.col(i[0])).alias(i[0]) if i[1] == "string" else i[0] for i in df.dtypes]   
-    
+     
     alteredDf = (df
                  .select(stringCols)
                  .withColumn(col=F.regexp_replace(F.col("EntityIdentifier")," ","").cast("integer"),colName="EntityIdentifier")
@@ -249,13 +257,13 @@ def main():
                  .withColumn(col=exUdf(F.col("Value")),colName="Value")
                  .withColumn(col=lenUdf(F.col("Value")),colName="originalLength")
                 )
-    #alteredDf.show(50)
+    alteredDf.show(50)
     alteredDf.printSchema()
-    
+     
     #write the dataframe to parquet file
     (alteredDf
      .write
-     .parquet(outputLocation+"/regnskaber.parquet",mode="overwrite"))
+     .parquet(outputLocation,mode="overwrite"))
     
 if __name__ == '__main__':
     main()
