@@ -205,15 +205,15 @@ def main():
         outputLocation = sys.argv[2]
         taxLocation = sys.argv[3]
     
-    #allFiles = os.listdir(csvLocation)
+    allFiles = os.listdir(csvLocation)
     
-<<<<<<< HEAD
     #print(allFiles)
-=======
->>>>>>> 73a4eddf790697c75c930c30b118be089c5f1ed3
+
     #initial preprocessing
-    writeToFile(removeNewlineChars(csvLocation),csvLocation)
-        
+    for f in allFiles:    
+        writeToFile(removeNewlineChars(csvLocation+"/"+f),csvLocation+"/"+f)
+    
+    print("done!")
     #move taxlists to anotherfolder
     #moveFiles(csvLocation,taxLocation)
     
