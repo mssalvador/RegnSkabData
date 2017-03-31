@@ -12,11 +12,20 @@ import fileinput
 import gzip
 import csv
 import sys
+import getpass
 from xml.dom import expatbuilder
 
 
-CSVFILES = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testcsv"
-NEWPATH = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/testXML"
+if getpass.getuser() == "biml":
+    sys.path.insert(0, "/home/biml/Arelle") # inserts Arelle to the pythonpath, apperently
+    USER = "/home/biml/bigdata/data_files/regnskaber/"
+elif getpass.getuser() == "svanhmic":
+    sys.path.insert(0, "/home/svanhmic/Programs/Arelle") # inserts Arelle to the pythonpath, apperently
+    USER = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/"
+
+
+CSVFILES = USER+"cleanCSV"
+NEWPATH = USER+"cleanXML"
        
 
 def getContextRef(docPath):
