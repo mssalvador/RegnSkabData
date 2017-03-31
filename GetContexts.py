@@ -128,7 +128,7 @@ def replaceUnitsAndContexts(docPath,csvPath):
         return str(csvPath)+str(contextDict)+str(unitDict)
     except OSError as systemstuff:
         print(systemstuff.strerror)
-        print("the file was not found")
+        #print("the file was not found")
         print(systemstuff.filename)
         return str(csvPath)+":Not Found"
     
