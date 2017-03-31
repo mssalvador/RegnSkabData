@@ -26,7 +26,7 @@ PATH = USER+"testXML"
 NEWPATH = USER+"cleanXML"
 TAXPATH = USER+"tax"
 ZIPFLES = USER+"testZipped"
-CSVFILES = USER+"cleanCSV"
+CSVFILES = USER+"testcsv"
 TAXDICT = {}
 TAXDICT["20120101"] = "/dcca20120101"
 TAXDICT["20121001"] = "/XBRL20121001"
@@ -193,11 +193,11 @@ if __name__ == '__main__':
     #unZipCollection(ZIPFLES, PATH)
     #acessFolder(PATH,NEWPATH,TAXDICT,TAXPATH)
     files = tuple(convertFromXmlToCsv(NEWPATH,CSVFILES))
-    #print(files[:10])
+    print(files[:10])
     print(len(files))
     #The conversion takes place here
-    pool = multiprocessing.Pool(processes=5)
-    pool.map(parallelToCsvFromXmlApiStyle,files)
+    #pool = multiprocessing.Pool(processes=5)
+    #pool.map(parallelToCsvFromXmlApiStyle,files)
     
     print(len(files))
     #print(len(os.listdir(CSVFILES)))

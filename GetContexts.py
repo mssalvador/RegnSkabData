@@ -126,9 +126,12 @@ def replaceUnitsAndContexts(docPath,csvPath):
         print("contexts: ",contextDict)
         print("units: ",unitDict)
         return str(csvPath)+str(contextDict)+str(unitDict)
-    except OSError:
+    except OSError as systemstuff:
+        print(systemstuff.strerror)
         print("the file was not found")
+        print(systemstuff.filename)
         return str(csvPath)+":Not Found"
+    
         
         
 def postProcessing(docPath,csvPath,checkFile=None):
