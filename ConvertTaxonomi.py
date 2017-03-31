@@ -26,7 +26,7 @@ PATH = USER+"testXML"
 NEWPATH = USER+"cleanXML"
 TAXPATH = USER+"tax"
 ZIPFLES = USER+"testZipped"
-CSVFILES = USER+"cleanCSV"
+CSVFILES = USER+"testcsv"#"cleanCSV"
 TAXDICT = {}
 TAXDICT["20120101"] = "/dcca20120101"
 TAXDICT["20121001"] = "/XBRL20121001"
@@ -173,7 +173,7 @@ def postProcessing(docPath,csvPath,logFile="/tmp/log.txt"):
     with open(logFile,"a") as log:
         try: 
             log.write(GetContexts.replaceUnitsAndContexts(docPath,csvPath)+"\n")
-        except KeyError:
+        except KeyError as ke:
             #print(docPath)
             print(csvPath+" the file is already processed\n")
             
@@ -196,8 +196,8 @@ if __name__ == '__main__':
     print(files[:10])
     print(len(files))
     #The conversion takes place here
-    #pool = multiprocessing.Pool(processes=5)
-    #pool.map(parallelToCsvFromXmlApiStyle,files)
+    pool = multiprocessing.Pool(processes=5)
+    pool.map(parallelToCsvFromXmlApiStyle,files)
     
     print(len(files))
     #print(len(os.listdir(CSVFILES)))

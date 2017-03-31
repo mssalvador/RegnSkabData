@@ -24,7 +24,7 @@ elif getpass.getuser() == "svanhmic":
     USER = "/home/svanhmic/workspace/Python/Erhvervs/data/regnskabsdata/"
 
 
-CSVFILES = USER+"cleanCSV"
+CSVFILES = USER+"testcsv"#"cleanCSV"
 NEWPATH = USER+"cleanXML"
        
 
@@ -103,7 +103,8 @@ def replaceUnitsAndContexts(docPath,csvPath):
         newRows = []
         fieldNames = [] 
         with open(csvPath) as csvfile:
-            file = csv.DictReader(csvfile,delimiter="|",dialect='excel',maxCharsPerColumn=2000000,quotes='"')
+            csv.field_size_limit(2000000)
+            file = csv.DictReader(csvfile,delimiter="|",dialect='excel',quotechar='"')
             #fieldNames = [fieldName.decode("ascii").encode("utf-8") for fieldName in file.fieldnames]
             fieldNames = file.fieldnames
             #print(fieldNames)
