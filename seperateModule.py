@@ -33,6 +33,9 @@ if __name__ == '__main__':
     for files in allFiles:
         oldFiles =csvPath+"/"+files+".csv" 
         newFiles = csvPath+"/odinOnly/"+files+".csv"
-        os.rename(oldFiles,newFiles)
+        if "taxlist.csv" in files:
+            pass
+        else:        
+            os.rename(oldFiles,newFiles)
         
     print("Done!")
