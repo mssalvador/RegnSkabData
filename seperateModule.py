@@ -36,7 +36,7 @@ if __name__ == '__main__':
         newFiles = csvPath+"/odinOnly/"+files+".csv"
         if os.path.isfile(csvPath+"/odinOnly/"+files+".csv"):
             print("it's there!")
-        elif os.path.isfile(csvPath+"/"+files+".csv"):
+        elif not os.path.isfile(csvPath+"/"+files+".csv"):
             print(files+" is not in old directory")
         else:     
             os.rename(oldFiles,newFiles)
