@@ -16,7 +16,13 @@ if __name__ == '__main__':
         xmlPath = "/home/biml/bigdata/data_files/regnskaber/cleanXML"
         csvPath = "/home/biml/bigdata/data_files/regnskaber/cleanCSV"
                 
-    allFiles = os.listdir(xmlPath)
+    allFolders = os.listdir(xmlPath)
+    allFiles = []
+    print(os.listdir(xmlPath+"/"+allFolders[0])[:10])
+    for folders in allFolders:
+        allFiles += os.listdir(xmlPath+"/"+folders)
+    print(allFiles[:10])
+    
     
     
     try:
