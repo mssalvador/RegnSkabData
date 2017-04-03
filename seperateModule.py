@@ -29,13 +29,17 @@ if __name__ == '__main__':
         os.mkdir(csvPath+"/odinOnly") # create dir
     except: 
         print("directory already created")
-        
+    
+
     for files in allFiles:
         oldFiles =csvPath+"/"+files+".csv" 
         newFiles = csvPath+"/odinOnly/"+files+".csv"
-        if "taxlist.csv" in files:
-            pass
-        else:        
+        if os.path.isfile(csvPath+"/odinOnly/"+files+".csv"):
+            print("it's there!")
+        elif os.path.isfile(csvPath+"/"+files+".csv"):
+            print(files+" is not in old directory")
+        else:     
             os.rename(oldFiles,newFiles)
-        
+ 
+                
     print("Done!")
